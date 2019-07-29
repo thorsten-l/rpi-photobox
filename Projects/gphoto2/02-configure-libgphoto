@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export GPHOME=/opt/gphoto2.5
+export PATH=$GPHOME/bin:$PATH
+export LD_LIBRARY_PATH=$GPHOME/lib
+export LD_RUN_PATH=$LD_LIBRARY_PATH
+
+./configure --without-aalib --prefix=$GPHOME 

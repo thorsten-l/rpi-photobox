@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo apt install automake autoconf libltdl-dev libexif-dev libusb-1.0-0-dev \
+	libjpeg-dev libgd-dev libxml++2.6-dev libpopt-dev libcdk5-dev \
+	libreadline-dev
