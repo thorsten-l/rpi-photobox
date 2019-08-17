@@ -201,15 +201,41 @@ public class GPhoto2Handler
     else
     {
       File snapshotFile = Config.getVarFile("snapshot.jpg");
-      File imageFile = new File(createImageFilename());
+      createImageFilename();
+      File imageFile = new File(imageFilename);
+      
+      if ( doHorizontalFlip )
+      {
+        LOGGER.info("Flip horrizontally snapshot image : {}", imageFile.getAbsolutePath());
+        flipHorizontally(snapshotFile, imageFile);
+      }
+      else
+      {
+        snapshotFile.renameTo(imageFile);
+        snapshot = ImageIO.read(imageFile);
+      }
 
-      snapshotFile.renameTo(imageFile);
       LOGGER.info("Load snapshot image : {}", imageFile.getAbsolutePath());
-      snapshot = ImageIO.read(imageFile);
       AppState.setState(AppState.PRINTQUESTION);
     }
   }
 
+  private void flipHorizontally( File inputFile, File outputFile ) throws IOException
+  {
+    BufferedImage inputImage = ImageIO.read(inputFile);
+    int width = inputImage.getWidth();
+    int height= inputImage.getHeight();
+    snapshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    for( int y = 0; y<height; y++)
+    {
+      for( int x=0; x<width; x++ )
+      {
+        snapshot.setRGB( width - 1 - x, y, inputImage.getRGB(x, y));
+      }
+    }
+    ImageIO.write( snapshot, "jpg", outputFile );
+  }
+  
   /**
    * Method description
    *
@@ -408,6 +434,8 @@ public class GPhoto2Handler
 
   /** Field description */
   private boolean gphoto2ready;
+  
+  private boolean doHorizontalFlip = false;
 
   /** Field description */
   private Thread inputHandlerThread;
