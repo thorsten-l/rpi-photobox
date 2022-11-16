@@ -232,7 +232,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <jackson.version>2.11.1</jackson.version>
+    <jackson.version>2.12.7.1</jackson.version>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
     <build.timestamp>${maven.build.timestamp}</build.timestamp>
   </properties>
