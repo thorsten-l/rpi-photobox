@@ -87,25 +87,6 @@
 
     <plugins>
       <plugin>
-        <artifactId>maven-toolchains-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>toolchain</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <toolchains>
-            <jdk>
-              <version>${toolchain.version}</version>
-              <vendor>${toolchain.vendor}</vendor>
-            </jdk>
-          </toolchains>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
       </plugin>
@@ -234,7 +215,7 @@
                   <serverId>photobox</serverId>
                   <fromDir>${project.build.directory}</fromDir>
                   <includes>photobox.jar</includes>
-                  <url>scp://photobox2</url>
+                  <url>scp://pi@photobox2</url>
                   <toDir>/home/pi/photobox/lib</toDir>
                 </configuration>
               </execution>
@@ -294,7 +275,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     
     <toolchain.version>11</toolchain.version>
-    <toolchain.vendor>Oracle</toolchain.vendor>
 
     <maven.compiler.source>${toolchain.version}</maven.compiler.source>
     <maven.compiler.target>${toolchain.version}</maven.compiler.target>

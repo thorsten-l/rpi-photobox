@@ -301,7 +301,29 @@ public class ViewPortPanel extends JPanel implements Runnable
         
         if (image != null)
         {
-          g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
+          if ( AppState.getState() != AppState.COUNTDOWN || counter > 2 )
+          {
+            g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
+          }
+          else
+          {
+            g2d.setColor(Color.black);
+            g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+            g2d.setColor(Color.white);
+            int w2 = this.getWidth() / 2;
+            int h3 = this.getHeight() / 3;
+            int[] px = { w2, w2-200, w2+200 };
+            int[] py = { 0, h3, h3 };
+            g2d.fillPolygon(px, py, 3);
+            g2d.fillRect(w2-100, h3, 200, this.getHeight()-h3);
+            
+            g2d.setColor(Color.GREEN);
+            g2d.setFont(midFont);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+              RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2d.drawString("Schau", w2+200, 80 );
+            g2d.drawString("hoch!", w2+200, 160 );
+          }
 
           if (AppState.getState() == AppState.COUNTDOWN)
           {
