@@ -1,6 +1,7 @@
 package l9g.photobox.cv;
 
 //~--- non-JDK imports --------------------------------------------------------
+import java.awt.AWTException;
 import l9g.photobox.AppState;
 import l9g.photobox.Config;
 import l9g.photobox.gphoto2.GPhoto2Exception;
@@ -16,10 +17,13 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Robot;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import l9g.photobox.App;
@@ -67,6 +71,17 @@ public class ViewPortPanel extends JPanel implements Runnable
     countdownPosY = config.getCountdownPosY();
     viewWidth = config.getViewWidth();
     viewHeight = config.getViewHeight();
+    
+    try
+    {
+      Robot robot = new Robot();
+      robot.mouseMove(viewWidth, viewHeight);
+    }
+    catch (AWTException ex)
+    {
+     LOGGER.warn("Robot for mouse movement does not work.");
+    }
+    
   }
 
   //~--- methods --------------------------------------------------------------
