@@ -143,6 +143,8 @@ public class ViewPortPanel extends JPanel implements Runnable
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
+        g2d.setColor(Color.black);
+        g2d.drawString("Bild wird gedruckt...", messagePosX+2, messagePosY+2);
         g2d.setColor(Color.cyan);
         g2d.drawString("Bild wird gedruckt...", messagePosX, messagePosY);
 
