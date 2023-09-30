@@ -145,12 +145,11 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>appassembler-maven-plugin</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
             <configuration>
               <logsDirectory>logs</logsDirectory>
               <configurationDirectory>config</configurationDirectory>
               <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-              <binPrefix>app</binPrefix>
               <assembleDirectory>${project.build.directory}/app</assembleDirectory>
               <extraJvmArguments>-Djava.library.path=/usr/local/lib</extraJvmArguments>
               <repositoryLayout>flat</repositoryLayout>

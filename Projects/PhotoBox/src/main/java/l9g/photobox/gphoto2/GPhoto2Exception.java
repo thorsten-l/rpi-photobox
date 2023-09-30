@@ -2,6 +2,7 @@ package l9g.photobox.gphoto2;
 
 //~--- JDK imports ------------------------------------------------------------
 
+import com.sun.source.tree.ThrowTree;
 import java.io.IOException;
 
 /**
@@ -38,7 +39,7 @@ public class GPhoto2Exception extends IOException
    * @param message
    * @param ex
    */
-  public GPhoto2Exception(String message, Exception ex)
+  public GPhoto2Exception(String message, Throwable ex)
   {
     super(message, ex);
   }

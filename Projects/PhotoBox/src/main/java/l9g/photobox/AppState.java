@@ -28,6 +28,9 @@ public enum AppState
   /** Field description */
   @Getter
   private static long stateChangedTimestamp;
+  
+  @Getter
+  private static String message;
 
   //~--- set methods ----------------------------------------------------------
 
@@ -39,8 +42,14 @@ public enum AppState
    */
   public static void setState(AppState newState)
   {
+    setState( newState, "" );
+  }
+  
+  public static void setState(AppState newState, String newMessage)
+  {
     state = newState;
+    message = newMessage;
     stateChangedTimestamp = System.currentTimeMillis();
-    LOGGER.info("Application state = {}", state.toString());
+    LOGGER.info("Application state = {} ({})", state.toString(), newMessage);
   }
 }

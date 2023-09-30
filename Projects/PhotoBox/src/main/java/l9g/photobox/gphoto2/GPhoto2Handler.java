@@ -1,7 +1,6 @@
 package l9g.photobox.gphoto2;
 
 //~--- non-JDK imports --------------------------------------------------------
-
 import l9g.photobox.AppState;
 import l9g.photobox.Config;
 import l9g.photobox.Util;
@@ -12,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //~--- JDK imports ------------------------------------------------------------
-
 import java.awt.image.BufferedImage;
 
 import java.io.File;
@@ -45,34 +43,44 @@ public class GPhoto2Handler
   private final static Logger LOGGER = LoggerFactory.getLogger(
     GPhoto2Handler.class.getName());
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final static GPhoto2Handler SINGLETON = new GPhoto2Handler();
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
     "YYYYMMdd-HHmmss");
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private static long imageCounter;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   @Getter
   private static BufferedImage snapshot;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   @Getter
   private static String imageFilename;
 
   //~--- constructors ---------------------------------------------------------
-
   /**
    * Constructs ...
    *
    */
-  private GPhoto2Handler() {}
+  private GPhoto2Handler()
+  {
+  }
 
   //~--- methods --------------------------------------------------------------
-
   /**
    * Method description
    *
@@ -84,7 +92,7 @@ public class GPhoto2Handler
     try
     {
       LOGGER.debug("Closing connection to camera.");
-      if ( SINGLETON != null )
+      if (SINGLETON != null)
       {
         SINGLETON.destroy();
       }
@@ -130,7 +138,7 @@ public class GPhoto2Handler
     {
       SINGLETON.captureImage();
     }
-    catch (InterruptedException | IOException ex)
+    catch (Throwable ex)
     {
       throw new GPhoto2Exception("Error taking picture.", ex);
     }
@@ -139,7 +147,6 @@ public class GPhoto2Handler
   }
 
   //~--- get methods ----------------------------------------------------------
-
   /**
    * Method description
    *
@@ -159,7 +166,6 @@ public class GPhoto2Handler
   }
 
   //~--- methods --------------------------------------------------------------
-
   /**
    * Method description
    *
@@ -197,16 +203,18 @@ public class GPhoto2Handler
     if (gphoto2error == true)
     {
       LOGGER.error("Taking picture failed.");
+      AppState.setState(AppState.ERROR, "Kamerafehler!");
     }
     else
     {
       File snapshotFile = Config.getVarFile("snapshot.jpg");
       createImageFilename();
       File imageFile = new File(imageFilename);
-      
-      if ( doHorizontalFlip )
+
+      if (doHorizontalFlip)
       {
-        LOGGER.info("Flip horrizontally snapshot image : {}", imageFile.getAbsolutePath());
+        LOGGER.info("Flip horrizontally snapshot image : {}", imageFile.
+          getAbsolutePath());
         flipHorizontally(snapshotFile, imageFile);
       }
       else
@@ -220,22 +228,23 @@ public class GPhoto2Handler
     }
   }
 
-  private void flipHorizontally( File inputFile, File outputFile ) throws IOException
+  private void flipHorizontally(File inputFile, File outputFile) throws
+    IOException
   {
     BufferedImage inputImage = ImageIO.read(inputFile);
     int width = inputImage.getWidth();
-    int height= inputImage.getHeight();
+    int height = inputImage.getHeight();
     snapshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-    for( int y = 0; y<height; y++)
+    for (int y = 0; y < height; y++)
     {
-      for( int x=0; x<width; x++ )
+      for (int x = 0; x < width; x++)
       {
-        snapshot.setRGB( width - 1 - x, y, inputImage.getRGB(x, y));
+        snapshot.setRGB(width - 1 - x, y, inputImage.getRGB(x, y));
       }
     }
-    ImageIO.write( snapshot, "jpg", outputFile );
+    ImageIO.write(snapshot, "jpg", outputFile);
   }
-  
+
   /**
    * Method description
    *
@@ -245,7 +254,7 @@ public class GPhoto2Handler
    */
   private void destroy() throws IOException, InterruptedException
   {
-    if ( gp2out != null )
+    if (gp2out != null)
     {
       gp2out.println("exit");
       gp2out.close();
@@ -253,13 +262,14 @@ public class GPhoto2Handler
       gphoto2Process.destroy();
     }
   }
-  
+
   /**
    * Method description
    *
    *
    *
    * @return
+   *
    * @throws IOException
    * @throws InterruptedException
    */
@@ -280,102 +290,105 @@ public class GPhoto2Handler
     errorMessage = null;
 
     inputHandlerThread = new Thread(
-      () -> {
-        try
+      () ->
+    {
+      try
+      {
+        char[] buffer = new char[1];
+        char c;
+        StringBuilder line = new StringBuilder();
+
+        while ((gp2in.read(buffer)) > 0)
         {
-          char[] buffer = new char[1];
-          char c;
-          StringBuilder line = new StringBuilder();
+          c = buffer[0];
 
-          while ((gp2in.read(buffer)) > 0)
+          if ((c == '\n') || (c == '\r') || (c == '>'))
           {
-            c = buffer[0];
-
-            if ((c == '\n') || (c == '\r') || (c == '>'))
+            if (c == '>')
             {
-              if (c == '>')
+              line.append('>');
+            }
+
+            System.out.println("\033[1;36m" + line.toString() + "\033[0m");
+
+            if ((c == '>') && line.toString().startsWith("gphoto2:"))
+            {
+              if (LOGGER.isDebugEnabled())
               {
-                line.append('>');
+                System.out.println();
+                System.out.flush();
+                LOGGER.debug("gphoto2 prompt found");
               }
 
-              System.out.println("\033[1;36m" + line.toString() + "\033[0m");
-
-              if ((c == '>') && line.toString().startsWith("gphoto2:"))
+              synchronized (SINGLETON)
               {
-                if (LOGGER.isDebugEnabled())
-                {
-                  System.out.println();
-                  System.out.flush();
-                  LOGGER.debug("gphoto2 prompt found");
-                }
-
-                synchronized (SINGLETON)
-                {
-                  SINGLETON.gphoto2ready = true;
-                  SINGLETON.notifyAll();
-                }
+                SINGLETON.gphoto2ready = true;
+                SINGLETON.notifyAll();
               }
+            }
 
-              line = new StringBuilder();
-            }
-            else
-            {
-              line.append((char) c);
-            }
+            line = new StringBuilder();
+          }
+          else
+          {
+            line.append((char) c);
           }
         }
-        catch (IOException ex)
-        {
-          LOGGER.error("Error reading gphoto2 input stream.", ex);
-        }
-      });
+      }
+      catch (Throwable ex)
+      {
+        LOGGER.error("Error reading gphoto2 input stream.", ex);
+        System.exit(-3);
+      }
+    });
 
     inputHandlerThread.setDaemon(true);
     inputHandlerThread.start();
 
     /////
-
     errorHandlerThread = new Thread(
-      () -> {
-        try
+      () ->
+    {
+      try
+      {
+        char[] buffer = new char[1];
+        char c;
+        StringBuilder line = new StringBuilder();
+
+        while ((gp2err.read(buffer)) > 0)
         {
-          char[] buffer = new char[1];
-          char c;
-          StringBuilder line = new StringBuilder();
+          c = buffer[0];
 
-          while ((gp2err.read(buffer)) > 0)
+          if ((c == '\n') || (c == '\r'))
           {
-            c = buffer[0];
+            System.out.println("\033[1;31m" + line.toString() + "\033[0m");
 
-            if ((c == '\n') || (c == '\r'))
+            if (line.toString().startsWith("*** Error")
+              || line.toString().startsWith("ERROR"))
             {
-              System.out.println("\033[1;31m" + line.toString() + "\033[0m");
-
-              if (line.toString().startsWith("*** Error")
-                || line.toString().startsWith("ERROR"))
+              synchronized (SINGLETON)
               {
-                synchronized (SINGLETON)
-                {
-                  SINGLETON.gphoto2ready = false;
-                  SINGLETON.gphoto2error = true;
-                  SINGLETON.errorMessage = line.toString();
-                  SINGLETON.notifyAll();
-                }
+                SINGLETON.gphoto2ready = false;
+                SINGLETON.gphoto2error = true;
+                SINGLETON.errorMessage = line.toString();
+                SINGLETON.notifyAll();
               }
+            }
 
-              line = new StringBuilder();
-            }
-            else
-            {
-              line.append((char) c);
-            }
+            line = new StringBuilder();
+          }
+          else
+          {
+            line.append((char) c);
           }
         }
-        catch (IOException ex)
-        {
-          LOGGER.error("Error reading gphoto2 error stream.", ex);
-        }
-      });
+      }
+      catch (IOException ex)
+      {
+        LOGGER.error("Error reading gphoto2 error stream.", ex);
+        System.exit(-2);
+      }
+    });
 
     errorHandlerThread.setDaemon(true);
     errorHandlerThread.start();
@@ -410,33 +423,50 @@ public class GPhoto2Handler
   }
 
   //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
+  /**
+   * Field description
+   */
   private Thread errorHandlerThread;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private String errorMessage;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private InputStreamReader gp2err;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private InputStreamReader gp2in;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private PrintStream gp2out;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Process gphoto2Process;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private boolean gphoto2error;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private boolean gphoto2ready;
-  
+
   private boolean doHorizontalFlip = false;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Thread inputHandlerThread;
 }

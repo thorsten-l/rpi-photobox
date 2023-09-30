@@ -16,6 +16,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import l9g.photobox.App;
+import l9g.photobox.Config;
 
 /**
  *
@@ -28,7 +29,7 @@ public class MouseHandler extends MouseAdapter
    * Field description
    */
   private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
-          MouseHandler.class.getName());
+    MouseHandler.class.getName());
 
   //~--- constructors ---------------------------------------------------------
   /**
@@ -69,7 +70,7 @@ public class MouseHandler extends MouseAdapter
       case READY:
       case STANDBY:
         if (noButtonClicked
-                && (System.currentTimeMillis() - yesButtonTimestamp) <= 1000)
+          && (System.currentTimeMillis() - yesButtonTimestamp) <= 1000)
         {
           LOGGER.info("Prepare shutdown...");
           App.buttonLed.setBlink(true);
@@ -86,8 +87,15 @@ public class MouseHandler extends MouseAdapter
 
         if (yesButtonClicked)
         {
-          AppState.setState(AppState.YESPRINT);
-          Util.printPicture();
+          if (Config.getInstance().isPrintingDisabled() == false)
+          {
+            AppState.setState(AppState.YESPRINT);
+            Util.printPicture();
+          }
+          else
+          {
+            LOGGER.info("Printing disabled");
+          }
         }
 
         break;

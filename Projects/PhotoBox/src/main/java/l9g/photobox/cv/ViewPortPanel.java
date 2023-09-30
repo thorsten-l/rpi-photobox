@@ -1,7 +1,6 @@
 package l9g.photobox.cv;
 
 //~--- non-JDK imports --------------------------------------------------------
-
 import l9g.photobox.AppState;
 import l9g.photobox.Config;
 import l9g.photobox.gphoto2.GPhoto2Exception;
@@ -10,7 +9,6 @@ import l9g.photobox.gphoto2.GPhoto2Handler;
 import org.slf4j.LoggerFactory;
 
 //~--- JDK imports ------------------------------------------------------------
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -25,26 +23,28 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 import l9g.photobox.App;
+import static l9g.photobox.AppState.STARTCOUNTDOWN;
 import l9g.photobox.Util;
 
 /**
  * Class description
  *
  *
- * @version        $version$, 18/08/24
- * @author         Dr. Thorsten Ludewig <t.ludewig@gmail.com>
+ * @version $version$, 18/08/24
+ * @author Dr. Thorsten Ludewig <t.ludewig@gmail.com>
  */
 public class ViewPortPanel extends JPanel implements Runnable
 {
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
     ViewPortPanel.class.getName());
 
   //~--- constructors ---------------------------------------------------------
-
   private final Config config;
-  
+
   /**
    * Constructs ...
    *
@@ -70,7 +70,6 @@ public class ViewPortPanel extends JPanel implements Runnable
   }
 
   //~--- methods --------------------------------------------------------------
-
   @Override
   public void paintComponent(Graphics g)
   {
@@ -100,10 +99,10 @@ public class ViewPortPanel extends JPanel implements Runnable
       noButtonRectangle = new Rectangle(imageX + buttonWidth + (2 * gap2),
         viewHeight - buttonHeight, buttonWidth, buttonHeight);
 
-      yesLabelPoint = new Point(yesButtonRectangle.x + (yesButtonRectangle
-        .width - yesBounds.getBounds().width) / 2, yesButtonRectangle.y
-        + fontHeightPx - (int) lineMetrics.getDescent() + (yesButtonRectangle
-        .height - fontHeightPx) / 2);
+      yesLabelPoint = new Point(yesButtonRectangle.x + (yesButtonRectangle.width
+        - yesBounds.getBounds().width) / 2, yesButtonRectangle.y
+        + fontHeightPx - (int) lineMetrics.getDescent()
+        + (yesButtonRectangle.height - fontHeightPx) / 2);
       noLabelPoint = new Point(noButtonRectangle.x + (noButtonRectangle.width
         - noBounds.getBounds().width) / 2, yesLabelPoint.y);
 
@@ -118,7 +117,7 @@ public class ViewPortPanel extends JPanel implements Runnable
         App.buttonLed.setBlink(false);
         AppState.setState(AppState.READY);
         break;
-      
+
       case PRINTINGFAILED:
         g2d.setFont(midFont);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -126,7 +125,7 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         g2d.setColor(Color.red);
         g2d.drawString("Drucker Fehler!", messagePosX, messagePosY - 80);
-        g2d.drawString("Evtl. kein Papier - behoben?", messagePosX, messagePosY );
+        g2d.drawString("Evtl. kein Papier - behoben?", messagePosX, messagePosY);
 
         g2d.setColor(Color.green);
         g2d.fillRect(yesButtonRectangle.x, yesButtonRectangle.y,
@@ -136,9 +135,8 @@ public class ViewPortPanel extends JPanel implements Runnable
         g2d.drawString(yesLabel, yesLabelPoint.x, yesLabelPoint.y);
 
         break;
-      
-      
-      case PRINTPICTURE :
+
+      case PRINTPICTURE:
         image = GPhoto2Handler.getSnapshot();
         g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
         g2d.setFont(midFont);
@@ -149,10 +147,10 @@ public class ViewPortPanel extends JPanel implements Runnable
         g2d.drawString("Bild wird gedruckt...", messagePosX, messagePosY);
 
         if ((System.currentTimeMillis() - AppState.getStateChangedTimestamp())
-          >= 10000 && printingChecked == false )
+          >= 10000 && printingChecked == false)
         {
           printingChecked = true;
-          if( Util.checkPrinting() == false )
+          if (Util.checkPrinting() == false)
           {
             g2d.setColor(Color.black);
             g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
@@ -170,11 +168,13 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         break;
 
-      case PRESHUTDOWN :
+      case PRESHUTDOWN:
         g2d.setFont(midFont);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
+        g2d.setColor(Color.black);
+        g2d.drawString("Shutdown?", messagePosX + 2, messagePosY + 2);
         g2d.setColor(Color.cyan);
         g2d.drawString("Shutdown?", messagePosX, messagePosY);
 
@@ -187,7 +187,7 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         break;
 
-      case LOADPICTURE :
+      case LOADPICTURE:
         g2d.setFont(midFont);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -209,7 +209,7 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         break;
 
-      case PRINTQUESTION :
+      case PRINTQUESTION:
         printingChecked = false;
         image = GPhoto2Handler.getSnapshot();
         g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
@@ -217,24 +217,44 @@ public class ViewPortPanel extends JPanel implements Runnable
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2d.setColor(Color.cyan);
-        g2d.drawString("Bild drucken?", messagePosX, messagePosY);
+        if (config.isPrintingDisabled() == false)
+        {
+          g2d.setColor(Color.black);
+          g2d.drawString("Bild drucken?", messagePosX + 2, messagePosY + 2);
+          g2d.setColor(Color.cyan);
+          g2d.drawString("Bild drucken?", messagePosX, messagePosY);
 
-        g2d.setColor(Color.green);
-        g2d.fillRect(yesButtonRectangle.x, yesButtonRectangle.y,
-          yesButtonRectangle.width, yesButtonRectangle.height);
+          g2d.setColor(Color.green);
+          g2d.fillRect(yesButtonRectangle.x, yesButtonRectangle.y,
+            yesButtonRectangle.width, yesButtonRectangle.height);
 
-        g2d.setColor(Color.red);
-        g2d.fillRect(noButtonRectangle.x, noButtonRectangle.y, noButtonRectangle
-          .width, noButtonRectangle.height);
+          g2d.setColor(Color.red);
+          g2d.fillRect(noButtonRectangle.x, noButtonRectangle.y,
+            noButtonRectangle.width, noButtonRectangle.height);
 
-        g2d.setColor(Color.white);
-        g2d.drawString(yesLabel, yesLabelPoint.x, yesLabelPoint.y);
-        g2d.drawString(noLabel, noLabelPoint.x, noLabelPoint.y);
+          g2d.setColor(Color.white);
+          g2d.drawString(yesLabel, yesLabelPoint.x, yesLabelPoint.y);
+          g2d.drawString(noLabel, noLabelPoint.x, noLabelPoint.y);
+        }
+        else
+        {
+          g2d.setColor(Color.black);
+          g2d.drawString("Vorschau", messagePosX + 2, messagePosY + 2);
+
+          g2d.setColor(Color.cyan);
+          g2d.drawString("Vorschau", messagePosX, messagePosY);
+
+          g2d.setColor(Color.green);
+          g2d.fillRect(noButtonRectangle.x, noButtonRectangle.y,
+            noButtonRectangle.width, noButtonRectangle.height);
+
+          g2d.setColor(Color.white);
+          g2d.drawString("weiter", noLabelPoint.x - 20, noLabelPoint.y);
+        }
 
         break;
 
-      case TAKEPICTURE :
+      case TAKEPICTURE:
         printingChecked = false;
         AppState.setState(AppState.TAKEPICTURE2);
         g2d.setColor(Color.white);
@@ -243,16 +263,18 @@ public class ViewPortPanel extends JPanel implements Runnable
         if (GPhoto2Handler.isReady())
         {
           Thread tpThread = new Thread(
-                                () -> {
-              try
-              {
-                GPhoto2Handler.takePicture();
-              }
-              catch (GPhoto2Exception ex)
-              {
-                LOGGER.error("Can't take picture", ex);
-              }
-            });
+            () ->
+          {
+            try
+            {
+              GPhoto2Handler.takePicture();
+            }
+            catch (GPhoto2Exception ex)
+            {
+              LOGGER.error("Can't take picture", ex);
+              AppState.setState(AppState.ERROR, "Übertragungsfehler!");
+            }
+          });
 
           tpThread.setDaemon(true);
           tpThread.start();
@@ -264,7 +286,7 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         break;
 
-      case TAKEPICTURE2 :
+      case TAKEPICTURE2:
         g2d.setColor(Color.white);
         g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 
@@ -279,29 +301,51 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         break;
 
-      case NOPRINT :
+      case NOPRINT:
         AppState.setState(AppState.STANDBY);
         break;
 
-      case YESPRINT :
-        g2d.setColor(Color.black);
-        g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
-        AppState.setState(AppState.PRINTPICTURE);
+      case YESPRINT:
+        if (config.isPrintingDisabled() == false)
+        {
+          g2d.setColor(Color.black);
+          g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+          AppState.setState(AppState.PRINTPICTURE);
+        }
+        else
+        {
+          AppState.setState(AppState.STANDBY);
+        }
         break;
 
-      case STARTCOUNTDOWN :
+      case STARTCOUNTDOWN:
         App.buttonLed.setBlink(true);
         counter = 5;
         counterTimestamp = System.currentTimeMillis();
         AppState.setState(AppState.COUNTDOWN);
 
-      default :
+      case ERROR:
+        g2d.setFont(midFont);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+          RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        g2d.setColor(Color.red);
+        g2d.drawString(AppState.getMessage(), messagePosX, 120);
         
-        image = (biGrabber != null ) ? biGrabber.getImage() : null;
-        
+        if ((System.currentTimeMillis()
+          - AppState.getStateChangedTimestamp()) >= 5000)
+        {
+          AppState.setState(AppState.STANDBY);
+        }
+        break;
+
+      default:
+
+        image = (biGrabber != null) ? biGrabber.getImage() : null;
+
         if (image != null)
         {
-          if ( AppState.getState() != AppState.COUNTDOWN || counter > 2 )
+          if (AppState.getState() != AppState.COUNTDOWN || counter > 2)
           {
             g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
           }
@@ -312,17 +356,23 @@ public class ViewPortPanel extends JPanel implements Runnable
             g2d.setColor(Color.white);
             int w2 = this.getWidth() / 2;
             int h3 = this.getHeight() / 3;
-            int[] px = { w2, w2-200, w2+200 };
-            int[] py = { 0, h3, h3 };
+            int[] px =
+            {
+              w2, w2 - 200, w2 + 200
+            };
+            int[] py =
+            {
+              0, h3, h3
+            };
             g2d.fillPolygon(px, py, 3);
-            g2d.fillRect(w2-100, h3, 200, this.getHeight()-h3);
-            
+            g2d.fillRect(w2 - 100, h3, 200, this.getHeight() - h3);
+
             g2d.setColor(Color.GREEN);
             g2d.setFont(midFont);
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
               RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g2d.drawString("Schau", w2+200, 80 );
-            g2d.drawString("hoch!", w2+200, 160 );
+            g2d.drawString("Schau", w2 + 200, 80);
+            g2d.drawString("hoch!", w2 + 200, 160);
           }
 
           if (AppState.getState() == AppState.COUNTDOWN)
@@ -362,6 +412,7 @@ public class ViewPortPanel extends JPanel implements Runnable
       catch (InterruptedException ex)
       {
         LOGGER.error("ViewPort failed", ex);
+        System.exit(-1);
       }
     }
   }
@@ -373,103 +424,153 @@ public class ViewPortPanel extends JPanel implements Runnable
   public void startUpdate()
   {
     LOGGER.debug("Starting Update");
-        
+
     updateViewThread = new Thread(this);
     updateViewThread.setDaemon(true);
     updateViewThread.start();
-    
+
     biGrabber = new BufferedImageGrabber();
     biGrabber.start();
-    
+
     panelWidth = this.getWidth();
     panelHeight = this.getHeight();
-    
+
     imageX = (panelWidth - config.getViewWidth()) / 2;
     imageY = (panelHeight - config.getViewHeight()) / 2;
   }
 
   //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
+  /**
+   * Field description
+   */
   private final Font bigFont;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final int bigFontHeight;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final int countdownPosX;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final int countdownPosY;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private long counter;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private long counterTimestamp;
 
   private BufferedImageGrabber biGrabber;
-  
-  /** Field description */
+
+  /**
+   * Field description
+   */
   private Thread updateViewThread;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private BufferedImage image;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private int imageX;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private int imageY;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final int messagePosX;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final int messagePosY;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final Font midFont;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Rectangle2D noBounds;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Rectangle noButtonRectangle;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final String noLabel = "NEIN";
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Point noLabelPoint;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private int panelHeight;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private int panelWidth;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private long startLoadingPictureTimestamp;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final int viewHeight;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final int viewWidth;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Rectangle2D yesBounds;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Rectangle yesButtonRectangle;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final String yesLabel = "JA";
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private Point yesLabelPoint;
-  
+
   private boolean printingChecked;
 }
-
