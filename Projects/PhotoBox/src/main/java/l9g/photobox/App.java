@@ -148,51 +148,44 @@ public class App implements GpioButtonListener
 
     String localIp = "<unknown>";
 
-    try
+    System.out.println("--- NetworkInterface ---");
+    Enumeration<NetworkInterface> networkInterfaceEnumeration
+      = NetworkInterface.getNetworkInterfaces();
+
+    while (networkInterfaceEnumeration.hasMoreElements())
     {
-      System.out.println("--- NetworkInterface ---");
-      Enumeration<NetworkInterface> networkInterfaceEnumeration
-        = NetworkInterface.getNetworkInterfaces();
+      NetworkInterface networkInterface
+        = networkInterfaceEnumeration.nextElement();
 
-      while (networkInterfaceEnumeration.hasMoreElements())
+      String name = networkInterface.getName();
+
+      if (name.startsWith("en")
+        || name.startsWith("eth")
+        || name.startsWith("wlan"))
       {
-        NetworkInterface networkInterface
-          = networkInterfaceEnumeration.nextElement();
+        System.out.print(networkInterface.getName());
 
-        String name = networkInterface.getName();
-
-        if (name.startsWith("en")
-          || name.startsWith("eth")
-          || name.startsWith("wlan"))
+        for (InterfaceAddress interfaceAddress : networkInterface.
+          getInterfaceAddresses())
         {
-          System.out.print(networkInterface.getName());
-
-          for (InterfaceAddress interfaceAddress : networkInterface.
-            getInterfaceAddresses())
+          if (interfaceAddress.getAddress().isSiteLocalAddress())
           {
-            if (interfaceAddress.getAddress().isSiteLocalAddress())
+            System.out.print(" " + interfaceAddress.getAddress().
+              getHostAddress());
+            if (localIp.equals("<unknown>"))
             {
-              System.out.print(" " + interfaceAddress.getAddress().
-                getHostAddress());
-              if ( localIp.equals("<unknown>"))
-              {
-                localIp = interfaceAddress.getAddress().
-                getHostAddress() + " ("+name+")";
-              }
-              else
-              {
-                localIp += " ," + interfaceAddress.getAddress().
-                getHostAddress() + " ("+name+")";
-              }
+              localIp = interfaceAddress.getAddress().
+                getHostAddress() + " (" + name + ")";
+            }
+            else
+            {
+              localIp += " ," + interfaceAddress.getAddress().
+                getHostAddress() + " (" + name + ")";
             }
           }
-          System.out.println();
         }
+        System.out.println();
       }
-    }
-    catch (SocketException e)
-    {
-      e.printStackTrace();
     }
 
     int result = JOptionPane.showConfirmDialog(null,
