@@ -22,11 +22,10 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import l9g.photobox.App;
+import static l9g.photobox.AppState.ERROR;
 import static l9g.photobox.AppState.STARTCOUNTDOWN;
 import l9g.photobox.Util;
 
@@ -45,6 +44,8 @@ public class ViewPortPanel extends JPanel implements Runnable
    */
   private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
     ViewPortPanel.class.getName());
+
+  private static final long serialVersionUID = 3249306173642427576L;
 
   //~--- constructors ---------------------------------------------------------
   private final Config config;
@@ -86,6 +87,7 @@ public class ViewPortPanel extends JPanel implements Runnable
 
   //~--- methods --------------------------------------------------------------
   @Override
+  @SuppressWarnings("fallthrough")
   public void paintComponent(Graphics g)
   {
     Graphics2D g2d = (Graphics2D) g;
@@ -334,13 +336,7 @@ public class ViewPortPanel extends JPanel implements Runnable
           AppState.setState(AppState.STANDBY);
         }
         break;
-
-      case STARTCOUNTDOWN:
-        App.buttonLed.setBlink(true);
-        counter = 5;
-        counterTimestamp = System.currentTimeMillis();
-        AppState.setState(AppState.COUNTDOWN);
-
+        
       case ERROR:
         g2d.setFont(midFont);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -355,9 +351,14 @@ public class ViewPortPanel extends JPanel implements Runnable
           AppState.setState(AppState.STANDBY);
         }
         break;
-
+        
+      case STARTCOUNTDOWN:
+        App.buttonLed.setBlink(true);
+        counter = 5;
+        counterTimestamp = System.currentTimeMillis();
+        AppState.setState(AppState.COUNTDOWN);
+        
       default:
-
         image = (biGrabber != null) ? biGrabber.getImage() : null;
 
         if (image != null)

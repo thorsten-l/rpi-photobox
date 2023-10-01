@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>l9g.photobox</groupId>
@@ -9,6 +8,15 @@
   <version>2.0.0-SNAPSHOT</version>
 
   <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <toolchain.version>21</toolchain.version>
+    <jackson.version>2.15.2</jackson.version>
+    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+    <build.timestamp>${maven.build.timestamp}</build.timestamp>
+    <maven.compiler.release>${toolchain.version}</maven.compiler.release>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -46,14 +54,14 @@
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
     </dependency>
-    
+
     <!-- cli -->
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
       <version>2.33</version>
     </dependency>
-    
+
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -66,14 +74,13 @@
       <artifactId>logback-classic</artifactId>
       <version>1.4.11</version>
     </dependency>
-  
+
   </dependencies>
 
-                
   <build>
-    
+
     <finalName>photobox</finalName>
-    
+
     <resources>
       <resource>
         <directory>src/main/resources</directory>
@@ -83,15 +90,31 @@
         <directory>src/main/config</directory>
         <filtering>true</filtering>
       </resource>
-    </resources>  
-
+    </resources>
+    
     <plugins>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <configuration>
+          <propertiesEncoding>${project.build.sourceEncoding}</propertiesEncoding>
+        </configuration>
       </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version> 
+        <configuration>
+          <verbose>false</verbose>
+          <compilerArgs>
+            <arg>-Xlint:-options</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+  
     </plugins>
-
   </build>
 
 
@@ -99,10 +122,10 @@
     <profile>
       <id>default</id>
     </profile>
-      
+
     <profile>
       <id>build-app</id>
-   
+
       <build>
         <plugins>
           <plugin>
@@ -224,7 +247,7 @@
         </plugins>
       </build>
     </profile>
-    
+
     <profile>
       <id>run-on-raspberrypi</id>
       <build>
@@ -270,13 +293,5 @@
     </profile>
 
   </profiles>
-    
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <toolchain.version>21</toolchain.version>
-    <jackson.version>2.15.2</jackson.version>
-    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
-    <build.timestamp>${maven.build.timestamp}</build.timestamp>
-    <maven.compiler.release>${toolchain.version}</maven.compiler.release>
-  </properties>
+
 </project>

@@ -331,7 +331,7 @@ public class GPhoto2Handler
           }
           else
           {
-            line.append((char) c);
+            line.append(c);
           }
         }
       }
@@ -379,7 +379,7 @@ public class GPhoto2Handler
           }
           else
           {
-            line.append((char) c);
+            line.append(c);
           }
         }
       }

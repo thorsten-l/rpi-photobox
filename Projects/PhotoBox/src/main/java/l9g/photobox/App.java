@@ -209,7 +209,7 @@ public class App implements GpioButtonListener
     }
 
     System.out.println("\nprinting disabled = " + config.isPrintingDisabled());
-    System.out.println("\n" + config + "\n");
+    System.out.println("\n" + config.toString().replace(',', '\n') + "\n");
 
     App listener = new App();
 
