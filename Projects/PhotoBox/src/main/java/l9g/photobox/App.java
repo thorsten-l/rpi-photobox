@@ -45,6 +45,15 @@ import l9g.photobox.gpio.GpioOutput;
 public class App implements GpioButtonListener
 {
 
+  static
+  {
+    String appHome = System.getProperty("app.home");
+    if (appHome == null || appHome.length() == 0)
+    {
+      System.setProperty("app.home", ".");
+    }
+  }
+
   /**
    * Field description
    */
