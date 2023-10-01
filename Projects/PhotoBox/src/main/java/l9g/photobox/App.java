@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 //~--- JDK imports ------------------------------------------------------------
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
@@ -22,9 +23,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Enumeration;
 
 import java.util.Properties;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 import l9g.photobox.gpio.GpioOutput;
 
 /**
@@ -41,7 +49,7 @@ public class App implements GpioButtonListener
    * Field description
    */
   private final static Logger LOGGER = LoggerFactory.getLogger(
-          App.class.getName());
+    App.class.getName());
 
   /**
    * Field description
@@ -62,16 +70,17 @@ public class App implements GpioButtonListener
    * Field description
    */
   private static GpioButtonHandler noButtonHandler;
-  
+
   public static GpioOutput buttonLed;
-  
+
   //~--- static initializers --------------------------------------------------
   static
   {
     try (PrintWriter out = new PrintWriter("timestamp.txt"))
     {
       out.println(new java.util.Date().toString());
-    } catch (FileNotFoundException ex)
+    }
+    catch (FileNotFoundException ex)
     {
       LOGGER.error("Could not write timestamp.txt", ex);
     }
@@ -83,17 +92,18 @@ public class App implements GpioButtonListener
     try
     {
       Class<?> tmpClass
-              = Class.forName("com.sun.java.swing.SwingUtilities3");
+        = Class.forName("com.sun.java.swing.SwingUtilities3");
       Method tmpMethod
-              = tmpClass.getMethod( "setVsyncRequested", Container.class, boolean.class );
+        = tmpClass.
+          getMethod("setVsyncRequested", Container.class, boolean.class);
       tmpMethod.invoke(tmpClass, f, Boolean.valueOf(b));
-      LOGGER.info( "VSync requested" );
-    } catch (Throwable ignore)
+      LOGGER.info("VSync requested");
+    }
+    catch (Throwable ignore)
     {
       LOGGER.error("Warning: Error while requesting vsync: " + ignore);
     }
   }
-
 
   /**
    * Method description
@@ -105,7 +115,7 @@ public class App implements GpioButtonListener
    * @throws InterruptedException
    */
   public static void main(String[] args)
-          throws IOException, InterruptedException
+    throws IOException, InterruptedException
   {
     LOGGER.info("PhotoBox starting...");
     AppState.setState(AppState.STARTUP);
@@ -119,7 +129,8 @@ public class App implements GpioButtonListener
       {
         GPhoto2Handler.close();
         Thread.sleep(5000);
-      } catch (InterruptedException | GPhoto2Exception ex)
+      }
+      catch (InterruptedException | GPhoto2Exception ex)
       {
         LOGGER.error("Error on sleep 5s", ex);
       }
@@ -129,46 +140,122 @@ public class App implements GpioButtonListener
 
     Config config = Config.getInstance();
 
+    UIManager.put("OptionPane.messageFont", new Font("Arial", Font.PLAIN, 48));
+    UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 48));
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+
+    String localIp = "<unknown>";
+
+    try
+    {
+      System.out.println("--- NetworkInterface ---");
+      Enumeration<NetworkInterface> networkInterfaceEnumeration
+        = NetworkInterface.getNetworkInterfaces();
+
+      while (networkInterfaceEnumeration.hasMoreElements())
+      {
+        NetworkInterface networkInterface
+          = networkInterfaceEnumeration.nextElement();
+
+        String name = networkInterface.getName();
+
+        if (name.startsWith("en")
+          || name.startsWith("eth")
+          || name.startsWith("wlan"))
+        {
+          System.out.print(networkInterface.getName());
+
+          for (InterfaceAddress interfaceAddress : networkInterface.
+            getInterfaceAddresses())
+          {
+            if (interfaceAddress.getAddress().isSiteLocalAddress())
+            {
+              System.out.print(" " + interfaceAddress.getAddress().
+                getHostAddress());
+              if ( localIp.equals("<unknown>"))
+              {
+                localIp = interfaceAddress.getAddress().
+                getHostAddress() + " ("+name+")";
+              }
+              else
+              {
+                localIp += " ," + interfaceAddress.getAddress().
+                getHostAddress() + " ("+name+")";
+              }
+            }
+          }
+          System.out.println();
+        }
+      }
+    }
+    catch (SocketException e)
+    {
+      e.printStackTrace();
+    }
+
+    int result = JOptionPane.showConfirmDialog(null,
+      "Datum: " + dateFormat.format(new java.util.Date())
+      + "\nUhrzeit: " + timeFormat.format(new java.util.Date())
+      + "\nNetzwerk-Adresse: " + localIp
+      + "\n\nDrucker verwenden?", "Drucker verwenden?",
+      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+    if (result == JOptionPane.OK_OPTION)
+    {
+      config.setPrintingDisabled(false);
+      JOptionPane.showMessageDialog(null,
+        "Drucker wird verwendet.\nEinschalten nicht vergessen!");
+    }
+    else
+    {
+      config.setPrintingDisabled(true);
+      UIManager.put("OptionPane.messageFont", new Font("Arial", Font.BOLD, 32));
+      JOptionPane.showMessageDialog(null, "Drucker wird NICHT verwendet!");
+    }
+
+    System.out.println("\nprinting disabled = " + config.isPrintingDisabled());
     System.out.println("\n" + config + "\n");
 
     App listener = new App();
 
     shutterButtonHandler = GpioButtonHandler.createInstance("shutter",
-            config.getShutterButtonGpioPin());
+      config.getShutterButtonGpioPin());
     shutterButtonHandler.addButtonPressedListener(listener);
 
     yesButtonHandler = GpioButtonHandler.createInstance("yes",
-            config.getYesButtonGpioPin());
+      config.getYesButtonGpioPin());
     yesButtonHandler.addButtonPressedListener(listener);
 
     noButtonHandler = GpioButtonHandler.createInstance("no",
-            config.getNoButtonGpioPin());
+      config.getNoButtonGpioPin());
     noButtonHandler.addButtonPressedListener(listener);
 
-    buttonLed = new GpioOutput( "led", config.getButtonLedGpioPin());
+    buttonLed = new GpioOutput("led", config.getButtonLedGpioPin());
     buttonLed.setValue(true);
-    
-    if ( config.isPrintingDisabled() == false )
+
+    if (config.isPrintingDisabled() == false)
     {
-      if ( Util.usbPrinterConnected() == false )
+      if (Util.usbPrinterConnected() == false)
       {
         LOGGER.error("\n\n*** USB Printer not found ***\n");
-        System.exit( 2 );
+        System.exit(2);
       }
-      
+
       Util.resetPrintSystem();
     }
-    
+
     GPhoto2Handler.connect();
 
     java.awt.EventQueue.invokeLater(
-            () ->
+      () ->
     {
       baseFrame = new BaseFrame();
 
       GraphicsDevice device
-              = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                      .getScreenDevices()[0];
+        = GraphicsEnvironment.getLocalGraphicsEnvironment()
+          .getScreenDevices()[0];
 
       baseFrame.setAlwaysOnTop(true);
       baseFrame.setAutoRequestFocus(true);
@@ -176,7 +263,6 @@ public class App implements GpioButtonListener
       Rectangle screenSize = device.getDefaultConfiguration().getBounds();
       Dimension appDimension = new Dimension(screenSize.width, screenSize.height);
 
-      
       baseFrame.setPreferredSize(appDimension);
       baseFrame.setMinimumSize(appDimension);
       baseFrame.setVisible(true);
@@ -201,30 +287,31 @@ public class App implements GpioButtonListener
       buildProperties.load(App.class.getResourceAsStream("/build.properties"));
       System.out.println("\nProject:");
       System.out.println("  name = " + buildProperties.getProperty(
-              "build.project.name"));
+        "build.project.name"));
       System.out.println("  version = " + buildProperties.getProperty(
-              "build.project.version"));
+        "build.project.version"));
       System.out.println("  build time = " + buildProperties.getProperty(
-              "build.timestamp") + " UTC");
+        "build.timestamp") + " UTC");
 
       System.out.println("\nCompiler:");
       System.out.println("  java.version = " + buildProperties.getProperty(
-              "build.java.version"));
+        "build.java.version"));
       System.out.println("  java.vendor = " + buildProperties.getProperty(
-              "build.java.vendor"));
+        "build.java.vendor"));
 
       System.out.println("\nRuntime:");
 
       System.out.println("  java.runtime.version = " + System.getProperty(
-              "java.runtime.version"));
+        "java.runtime.version"));
       System.out.println("  java.runtime.name = " + System.getProperty(
-              "java.runtime.name"));
+        "java.runtime.name"));
       System.out.println("  java.vm.info = " + System.getProperty(
-              "java.vm.info"));
+        "java.vm.info"));
       System.out.println("  java.vm.name = " + System.getProperty(
-              "java.vm.name"));
+        "java.vm.name"));
       System.out.println();
-    } catch (IOException ex)
+    }
+    catch (IOException ex)
     {
       LOGGER.error("Can not load build.properties file.", ex);
     }
@@ -256,22 +343,24 @@ public class App implements GpioButtonListener
       case READY:
       case STANDBY:
         if ((pressedPinNumber == yesPinNumber)
-                || (pressedPinNumber == noPinNumber))
+          || (pressedPinNumber == noPinNumber))
         {
           try
           {
             if ((yesButtonHandler.getGpioPin().getValue() == false)
-                    && (noButtonHandler.getGpioPin().getValue() == false))
+              && (noButtonHandler.getGpioPin().getValue() == false))
             {
               LOGGER.info("Prepare shutdown...");
               buttonLed.setBlink(true);
               AppState.setState(AppState.PRESHUTDOWN);
             }
-          } catch (IOException ex)
+          }
+          catch (IOException ex)
           {
             LOGGER.error("Can't read gpio pins", ex);
           }
-        } else if (pressedPinNumber == shutterPinNumber)
+        }
+        else if (pressedPinNumber == shutterPinNumber)
         {
           AppState.setState(AppState.STARTCOUNTDOWN);
         }
@@ -292,9 +381,9 @@ public class App implements GpioButtonListener
         }
 
         break;
-        
+
       case PRINTINGFAILED:
-        
+
         if (pressedPinNumber == yesPinNumber)
         {
           AppState.setState(AppState.STANDBY);

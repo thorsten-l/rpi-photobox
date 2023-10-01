@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 //~--- JDK imports ------------------------------------------------------------
 import java.io.File;
 import java.io.IOException;
+import lombok.Setter;
 
 /**
  * Class description
@@ -318,6 +319,7 @@ public class Config
    * Field description
    */
   @Getter
+  @Setter
   private boolean printingDisabled;
 
   /**
