@@ -223,6 +223,8 @@ public class GPhoto2Handler
         snapshot = ImageIO.read(imageFile);
       }
 
+      LOGGER.debug("snapshot image width={} height={}",
+        snapshot.getWidth(), snapshot.getHeight());
       LOGGER.info("Load snapshot image : {}", imageFile.getAbsolutePath());
       AppState.setState(AppState.PRINTQUESTION);
     }

@@ -1,43 +1,37 @@
-package l9g.gpiotest.gpio;
+package l9g.photobox.gpio;
 
 //~--- non-JDK imports --------------------------------------------------------
-
-import jdk.dio.DeviceManager;
-import jdk.dio.gpio.GPIOPin;
-import jdk.dio.gpio.GPIOPinConfig;
-import jdk.dio.gpio.PinEvent;
-import jdk.dio.gpio.PinListener;
-
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalInputConfigBuilder;
+import com.pi4j.io.gpio.digital.DigitalStateChangeEvent;
+import com.pi4j.io.gpio.digital.DigitalStateChangeListener;
+import com.pi4j.io.gpio.digital.PullResistance;
 import lombok.Getter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 //~--- JDK imports ------------------------------------------------------------
-
 import java.io.IOException;
 
 import java.util.HashSet;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class description
  *
  *
- * @version        $version$, 18/08/19
- * @author         Dr. Thorsten Ludewig <t.ludewig@gmail.com>
+ * @version $version$, 18/08/19
+ * @author Dr. Thorsten Ludewig <t.ludewig@gmail.com>
  */
-public class GpioButtonHandler implements PinListener
+@Slf4j
+public class GpioButtonHandler implements DigitalStateChangeListener
 {
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final static long DEBOUNCING_TIME = 200;    // in ms
-
-  /** Field description */
-  private final static Logger LOGGER = LoggerFactory.getLogger(
-    GpioButtonHandler.class.getName());
-
+  
   //~--- constructors ---------------------------------------------------------
-
   /**
    * Constructs ...
    *
@@ -49,25 +43,22 @@ public class GpioButtonHandler implements PinListener
    */
   private GpioButtonHandler(String name, int pinNumber) throws IOException
   {
+    log.debug("GpioButtonHandler({}, {})", name, pinNumber);
     this.name = name;
     this.pinNumber = pinNumber;
 
-    //J--
-    GPIOPinConfig config = new GPIOPinConfig.Builder()
-            .setControllerNumber(0)
-            .setPinNumber(pinNumber).setDirection(GPIOPinConfig.DIR_INPUT_ONLY)
-            .setDriveMode(GPIOPinConfig.MODE_INPUT_PULL_UP)
-            .setTrigger(GPIOPinConfig.TRIGGER_FALLING_EDGE)
-            .setInitValue(true)
-            .build();
-    //J++
+    DigitalInputConfigBuilder gpioConfig
+      = DigitalInput.newConfigBuilder(GpioContext.getPi4JContext())
+        .id("button_" + name)
+        .name(name)
+        .address(pinNumber)
+        .pull(PullResistance.PULL_UP);
 
-    gpioPin = DeviceManager.open(GPIOPin.class, config);
+    gpioPin = GpioContext.getPi4JContext().create(gpioConfig);
     debounceTimestamp = System.currentTimeMillis();
   }
 
   //~--- methods --------------------------------------------------------------
-
   /**
    * Method description
    *
@@ -82,19 +73,13 @@ public class GpioButtonHandler implements PinListener
   public static GpioButtonHandler createInstance(String name, int gpioPin)
     throws IOException
   {
-    LOGGER.debug("Listening on pin " + gpioPin);
-
+    log.debug("Listening on pin " + gpioPin);
     GpioButtonHandler handler = new GpioButtonHandler(name, gpioPin);
-
-    handler.gpioPin.setInputListener(handler);
-
+    handler.gpioPin.addListener(handler);
     return handler;
   }
 
   /**
-   * Method description
-   *
-   *
    * @param listener
    */
   public synchronized void addButtonPressedListener(GpioButtonListener listener)
@@ -104,7 +89,6 @@ public class GpioButtonHandler implements PinListener
 
   /**
    * Method description
-   *
    */
   public synchronized void removeAllButtonPressedListeners()
   {
@@ -124,14 +108,15 @@ public class GpioButtonHandler implements PinListener
   }
 
   @Override
-  public void valueChanged(PinEvent pe)
+  public void onDigitalStateChange(DigitalStateChangeEvent dsce)
   {
+    log.trace("onDigitalStateChange");
     long currentTimestamp = System.currentTimeMillis();
 
     if ((currentTimestamp - debounceTimestamp) > DEBOUNCING_TIME
-      && (pe.getValue() == false))
+      && (gpioPin.isLow()))
     {
-      LOGGER.debug("GPIO pin {} button pressed", pinNumber);
+      log.debug("GPIO pin {} button pressed", pinNumber);
 
       synchronized (this)
       {
@@ -146,22 +131,31 @@ public class GpioButtonHandler implements PinListener
   }
 
   //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
+  /**
+   * Field description
+   */
   private long debounceTimestamp;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   @Getter
-  private final GPIOPin gpioPin;
+  private final DigitalInput gpioPin;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   private final HashSet<GpioButtonListener> listeners = new HashSet<>();
 
-  /** Field description */
+  /**
+   * Field description
+   */
   @Getter
   private final String name;
 
-  /** Field description */
+  /**
+   * Field description
+   */
   @Getter
   private final int pinNumber;
 }

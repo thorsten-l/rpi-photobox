@@ -1,0 +1,6 @@
+{
+  "noButtonGpioPin" : 27,
+  "shutterButtonGpioPin" : 17,
+  "yesButtonGpioPin" : 22,
+  "buttonLedGpioPin" : 21
+}

@@ -1,17 +1,12 @@
-package l9g.gpiotest.gpio;
+package l9g.photobox.gpio;
 
 //~--- non-JDK imports --------------------------------------------------------
-
-import jdk.dio.gpio.GPIOPin;
-
+import com.pi4j.io.gpio.digital.DigitalInput;
 import lombok.Getter;
 
 /**
- * Class description
  *
- *
- * @version        $version$, 18/08/19
- * @author         Dr. Thorsten Ludewig <t.ludewig@gmail.com>
+ * @author Dr. Thorsten Ludewig <t.ludewig@gmail.com>
  */
 public class GpioButtonEvent
 {
@@ -24,7 +19,7 @@ public class GpioButtonEvent
    * @param pinNumber
    * @param gpioPin
    */
-  GpioButtonEvent(String name, int pinNumber, GPIOPin gpioPin)
+  GpioButtonEvent(String name, int pinNumber, DigitalInput gpioPin)
   {
     this.name = name;
     this.pinNumber = pinNumber;
@@ -32,16 +27,12 @@ public class GpioButtonEvent
   }
 
   //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
   @Getter
-  private final GPIOPin gpioPin;
+  private final DigitalInput gpioPin;
 
-  /** Field description */
   @Getter
   private final String name;
 
-  /** Field description */
   @Getter
   private final int pinNumber;
 }

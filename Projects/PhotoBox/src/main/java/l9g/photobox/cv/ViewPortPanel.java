@@ -24,7 +24,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
-import l9g.photobox.App;
 import static l9g.photobox.AppState.ERROR;
 import static l9g.photobox.AppState.STARTCOUNTDOWN;
 import l9g.photobox.Util;
@@ -50,6 +49,8 @@ public class ViewPortPanel extends JPanel implements Runnable
   //~--- constructors ---------------------------------------------------------
   private final Config config;
 
+  private boolean doOnce;
+
   /**
    * Constructs ...
    *
@@ -72,7 +73,10 @@ public class ViewPortPanel extends JPanel implements Runnable
     countdownPosY = config.getCountdownPosY();
     viewWidth = config.getViewWidth();
     viewHeight = config.getViewHeight();
-    
+
+    LOGGER.debug("viewWidth={}", viewWidth);
+    LOGGER.debug("viewHeight={}", viewHeight);
+
     try
     {
       Robot robot = new Robot();
@@ -80,9 +84,9 @@ public class ViewPortPanel extends JPanel implements Runnable
     }
     catch (AWTException ex)
     {
-     LOGGER.warn("Robot for mouse movement does not work.");
+      LOGGER.warn("Robot for mouse movement does not work.");
     }
-    
+
   }
 
   //~--- methods --------------------------------------------------------------
@@ -130,8 +134,8 @@ public class ViewPortPanel extends JPanel implements Runnable
     {
       case STANDBY:
         g2d.setColor(Color.black);
-        g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
-        App.buttonLed.setBlink(false);
+        g2d.fillRect(0, 0, viewWidth, viewHeight);
+        // App.buttonLed.setBlink(false);
         AppState.setState(AppState.READY);
         break;
 
@@ -161,7 +165,8 @@ public class ViewPortPanel extends JPanel implements Runnable
           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         g2d.setColor(Color.black);
-        g2d.drawString("Bild wird gedruckt...", messagePosX+2, messagePosY+2);
+        g2d.
+          drawString("Bild wird gedruckt...", messagePosX + 2, messagePosY + 2);
         g2d.setColor(Color.cyan);
         g2d.drawString("Bild wird gedruckt...", messagePosX, messagePosY);
 
@@ -173,7 +178,7 @@ public class ViewPortPanel extends JPanel implements Runnable
           {
             g2d.setColor(Color.black);
             g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
-            App.buttonLed.setBlink(false);
+            // App.buttonLed.setBlink(false);
             AppState.setState(AppState.PRINTINGFAILED);
             Util.resetPrintSystem();
           }
@@ -200,7 +205,7 @@ public class ViewPortPanel extends JPanel implements Runnable
         if ((System.currentTimeMillis() - AppState.getStateChangedTimestamp())
           >= 5000)
         {
-          App.buttonLed.setBlink(false);
+          // App.buttonLed.setBlink(false);
           AppState.setState(AppState.STANDBY);
         }
 
@@ -222,53 +227,64 @@ public class ViewPortPanel extends JPanel implements Runnable
         w /= 20000.0;
         w *= viewWidth;
 
-        g2d.fillRect(imageX, messagePosY - 120, (int) w, 32);
+        g2d.fillRect(imageX, messagePosY + 64, (int) w, 32);
 
         g2d.drawString("Bitte warten...", messagePosX, messagePosY);
-
+        doOnce = true;
         break;
 
       case PRINTQUESTION:
         printingChecked = false;
-        image = GPhoto2Handler.getSnapshot();
-        g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
-        g2d.setFont(midFont);
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-          RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        if (config.isPrintingDisabled() == false)
+        if (doOnce)
         {
+          doOnce = false;
+          image = GPhoto2Handler.getSnapshot();
+
+          LOGGER.debug("iw={}, ih={}, vw={}, vh={}",
+            image.getWidth(), image.getHeight(), viewWidth, viewHeight);
           g2d.setColor(Color.black);
-          g2d.drawString("Bild drucken?", messagePosX + 2, messagePosY + 2);
-          g2d.setColor(Color.cyan);
-          g2d.drawString("Bild drucken?", messagePosX, messagePosY);
+          g2d.fillRect(0, 0, viewWidth, viewHeight);
+          g2d.drawImage(image, 64, 0, 1152, 768, this);
 
-          g2d.setColor(Color.green);
-          g2d.fillRect(yesButtonRectangle.x, yesButtonRectangle.y,
-            yesButtonRectangle.width, yesButtonRectangle.height);
+          g2d.setFont(midFont);
+          g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-          g2d.setColor(Color.red);
-          g2d.fillRect(noButtonRectangle.x, noButtonRectangle.y,
-            noButtonRectangle.width, noButtonRectangle.height);
+          if (config.isPrintingDisabled() == false)
+          {
+            g2d.setColor(Color.black);
+            g2d.drawString("Bild drucken?", messagePosX + 2, messagePosY + 2);
+            g2d.setColor(Color.cyan);
+            g2d.drawString("Bild drucken?", messagePosX, messagePosY);
 
-          g2d.setColor(Color.white);
-          g2d.drawString(yesLabel, yesLabelPoint.x, yesLabelPoint.y);
-          g2d.drawString(noLabel, noLabelPoint.x, noLabelPoint.y);
-        }
-        else
-        {
-          g2d.setColor(Color.black);
-          g2d.drawString("Vorschau", messagePosX + 2, messagePosY + 2);
+            g2d.setColor(Color.green);
+            g2d.fillRect(yesButtonRectangle.x, yesButtonRectangle.y,
+              yesButtonRectangle.width, yesButtonRectangle.height);
 
-          g2d.setColor(Color.cyan);
-          g2d.drawString("Vorschau", messagePosX, messagePosY);
+            g2d.setColor(Color.red);
+            g2d.fillRect(noButtonRectangle.x, noButtonRectangle.y,
+              noButtonRectangle.width, noButtonRectangle.height);
 
-          g2d.setColor(Color.green);
-          g2d.fillRect(noButtonRectangle.x, noButtonRectangle.y,
-            noButtonRectangle.width, noButtonRectangle.height);
+            g2d.setColor(Color.white);
+            g2d.drawString(yesLabel, yesLabelPoint.x, yesLabelPoint.y);
+            g2d.drawString(noLabel, noLabelPoint.x, noLabelPoint.y);
+          }
+          else
+          {
+            g2d.setColor(Color.black);
+            g2d.drawString("Vorschau", messagePosX + 2, messagePosY + 2);
 
-          g2d.setColor(Color.white);
-          g2d.drawString("weiter", noLabelPoint.x - 20, noLabelPoint.y);
+            g2d.setColor(Color.cyan);
+            g2d.drawString("Vorschau", messagePosX, messagePosY);
+
+            g2d.setColor(Color.green);
+            g2d.fillRect(noButtonRectangle.x, noButtonRectangle.y,
+              noButtonRectangle.width, noButtonRectangle.height);
+
+            g2d.setColor(Color.white);
+            g2d.drawString("weiter", noLabelPoint.x - 20, noLabelPoint.y);
+          }
         }
 
         break;
@@ -336,7 +352,7 @@ public class ViewPortPanel extends JPanel implements Runnable
           AppState.setState(AppState.STANDBY);
         }
         break;
-        
+
       case ERROR:
         g2d.setFont(midFont);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -344,33 +360,34 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         g2d.setColor(Color.red);
         g2d.drawString(AppState.getMessage(), messagePosX, 120);
-        
+
         if ((System.currentTimeMillis()
           - AppState.getStateChangedTimestamp()) >= 5000)
         {
           AppState.setState(AppState.STANDBY);
         }
         break;
-        
+
       case STARTCOUNTDOWN:
-        App.buttonLed.setBlink(true);
+        // App.buttonLed.setBlink(true);
         counter = 5;
         counterTimestamp = System.currentTimeMillis();
         AppState.setState(AppState.COUNTDOWN);
-        
+
       default:
         image = (biGrabber != null) ? biGrabber.getImage() : null;
 
         if (image != null)
         {
+          g2d.setColor(Color.black);
+          g2d.fillRect(0, 0, viewWidth, viewHeight);
           if (AppState.getState() != AppState.COUNTDOWN || counter > 2)
           {
-            g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
+            // g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
+            g2d.drawImage(image, 64, 0, 1152, 768, this);
           }
           else
           {
-            g2d.setColor(Color.black);
-            g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
             g2d.setColor(Color.white);
             int w2 = this.getWidth() / 2;
             int h3 = this.getHeight() / 3;

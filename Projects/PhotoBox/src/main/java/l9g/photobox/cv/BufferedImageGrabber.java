@@ -5,12 +5,12 @@ import l9g.photobox.Config;
 
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 import org.slf4j.LoggerFactory;
 
 //~--- JDK imports ------------------------------------------------------------
 import java.awt.image.BufferedImage;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 /**
  *
@@ -23,13 +23,13 @@ public class BufferedImageGrabber extends Thread
    * Field description
    */
   private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
-          BufferedImageGrabber.class.getName());
+    BufferedImageGrabber.class.getName());
 
   /**
    * Field description
    */
   private final static Java2DFrameConverter CONVERTER
-          = new Java2DFrameConverter();
+    = new Java2DFrameConverter();
 
   //~--- methods --------------------------------------------------------------
   @Override
@@ -45,7 +45,8 @@ public class BufferedImageGrabber extends Thread
         {
           image = bi;
         }
-      } catch (FrameGrabber.Exception ex)
+      }
+      catch (FrameGrabber.Exception ex)
       {
         LOGGER.error("grabbing image not working", ex);
       }
@@ -53,7 +54,8 @@ public class BufferedImageGrabber extends Thread
       try
       {
         Thread.sleep(10);
-      } catch (InterruptedException ex)
+      }
+      catch (InterruptedException ex)
       {
         LOGGER.error("ViewPort failed", ex);
       }
@@ -68,21 +70,22 @@ public class BufferedImageGrabber extends Thread
     setName("BufferedImageGrabber");
 
     LOGGER.info("Starting Grabber");
-
-    grabber = new OpenCVFrameGrabber(Config.getInstance()
-            .getVideoDeviceIndex());
-
-
-    Config config = Config.getInstance();
-    grabber.setImageWidth(config.getCaptureWidth());
-    grabber.setImageHeight(config.getCaptureHeight());
-    grabber.setFormat("YUYV");
-
     try
     {
+      grabber = new OpenCVFrameGrabber(0);
+      Config config = Config.getInstance();
+      LOGGER.info("create grabber");
+      LOGGER.info("create grabber config w={}, h={}", config.getCaptureWidth(),
+        config.getCaptureHeight());
+      grabber.setImageWidth(config.getCaptureWidth());
+      grabber.setImageHeight(config.getCaptureHeight());
+      grabber.setFormat("YUYV");
+
+      LOGGER.info("start grabber");
       grabber.start();
       super.start();
-    } catch (FrameGrabber.Exception ex)
+    }
+    catch (FrameGrabber.Exception ex)
     {
       LOGGER.error("Grabber NOT started.", ex);
     }
@@ -101,15 +104,13 @@ public class BufferedImageGrabber extends Thread
   }
 
   //~--- fields ---------------------------------------------------------------
-
   /**
    * Field description
    */
-  private OpenCVFrameGrabber grabber;
+  private FrameGrabber grabber;
 
   /**
    * Field description
    */
   private BufferedImage image;
 }
-

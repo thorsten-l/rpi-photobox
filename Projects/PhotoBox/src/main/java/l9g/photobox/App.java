@@ -18,6 +18,7 @@ import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.io.File;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,11 +26,11 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 
 import java.util.Properties;
+import java.util.logging.Level;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -248,6 +249,8 @@ public class App implements GpioButtonListener
       Util.resetPrintSystem();
     }
 
+    File varDir = Config.getVarDirectory();
+    varDir.mkdirs();
     GPhoto2Handler.connect();
 
     java.awt.EventQueue.invokeLater(
@@ -270,7 +273,15 @@ public class App implements GpioButtonListener
       baseFrame.setVisible(true);
       device.setFullScreenWindow(baseFrame);
       AppState.setState(AppState.STANDBY);
-      buttonLed.setValue(false);
+      try
+      {
+        buttonLed.setValue(true);
+      }
+      catch (IOException ex)
+      {
+        java.util.logging.Logger.getLogger(App.class.getName()).
+          log(Level.SEVERE, null, ex);
+      }
       baseFrame.setVisible(true);
       setVsyncRequested(baseFrame, true);
     });
@@ -317,7 +328,6 @@ public class App implements GpioButtonListener
     {
       LOGGER.error("Can not load build.properties file.", ex);
     }
-
   }
 
   @Override
@@ -336,8 +346,16 @@ public class App implements GpioButtonListener
       case PRESHUTDOWN:
         if (pressedPinNumber == shutterPinNumber)
         {
-          buttonLed.setBlink(false);
+          try
+          {
+            buttonLed.setValue(false);
+          }
+          catch (IOException ex)
+          {
+            LOGGER.error("Can't set LED");
+          }
           baseFrame.dispose();
+          System.exit(0);
         }
 
         break;
@@ -349,11 +367,11 @@ public class App implements GpioButtonListener
         {
           try
           {
-            if ((yesButtonHandler.getGpioPin().getValue() == false)
-              && (noButtonHandler.getGpioPin().getValue() == false))
+            if ((yesButtonHandler.getGpioPin().isLow())
+              && (noButtonHandler.getGpioPin().isLow()))
             {
               LOGGER.info("Prepare shutdown...");
-              buttonLed.setBlink(true);
+              buttonLed.setValue(true);
               AppState.setState(AppState.PRESHUTDOWN);
             }
           }
@@ -372,7 +390,7 @@ public class App implements GpioButtonListener
       case PRINTQUESTION:
         if (pressedPinNumber == noPinNumber)
         {
-          buttonLed.setBlink(false);
+          // buttonLed.setBlink(false);
           AppState.setState(AppState.NOPRINT);
         }
 

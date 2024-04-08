@@ -1,39 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>l9g.photobox</groupId>
-  <artifactId>PhotoBox</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <artifactId>GPIOtestPi4J</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jackson.version>2.17.0</jackson.version>
-    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
-    <build.timestamp>${maven.build.timestamp}</build.timestamp>
-    <maven.compiler.release>11</maven.compiler.release>
-    <pi4j.version>2.5.1</pi4j.version>
-  </properties>
-
   <dependencies>
-    <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>javacv</artifactId>
-      <version>1.5.9</version>
-    </dependency>    
-    <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>javacv-platform</artifactId>
-      <version>1.5.9</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>33.1.0-jre</version>
-    </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -54,27 +28,19 @@
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
     </dependency>
-
-    <!-- cli -->
-    <dependency>
-      <groupId>args4j</groupId>
-      <artifactId>args4j</artifactId>
-      <version>2.37</version>
-    </dependency>
-
+    
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.12</version>
+      <version>${slf4j.version}</version>
     </dependency>
-
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.5.3</version>
     </dependency>
-    
+ 
     <!-- include Pi4J Core -->
     <dependency>
       <groupId>com.pi4j</groupId>
@@ -96,10 +62,11 @@
 
   </dependencies>
 
+                
   <build>
-
-    <finalName>photobox</finalName>
-
+    
+    <finalName>gpiotestpi4j</finalName>
+    
     <resources>
       <resource>
         <directory>src/main/resources</directory>
@@ -109,48 +76,27 @@
         <directory>src/main/config</directory>
         <filtering>true</filtering>
       </resource>
-    </resources>
-    
+    </resources>  
+
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.1</version>
-        <configuration>
-          <propertiesEncoding>${project.build.sourceEncoding}</propertiesEncoding>
-        </configuration>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version> 
-        <configuration>
-          <verbose>false</verbose>
-          <compilerArgs>
-            <arg>-Xlint:-options</arg>
-          </compilerArgs>
-        </configuration>
+        <version>3.12.1</version>
       </plugin>
-  
     </plugins>
   </build>
 
 
   <profiles>
     <profile>
-      <id>default</id>
-    </profile>
-
-    <profile>
       <id>build-app</id>
-
+   
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.1.2</version>
+            <version>3.6.1</version>
             <executions>
               <execution>
                 <id>copy-dependencies</id>
@@ -177,7 +123,7 @@
                       <version>${project.version}</version>
                       <overWrite>true</overWrite>
                       <outputDirectory>${project.build.directory}/app/lib</outputDirectory>
-                      <destFileName>photobox.jar</destFileName>
+                      <destFileName>gpiotestpi4j.jar</destFileName>
                     </artifactItem>
                   </artifactItems>
                 </configuration>
@@ -193,6 +139,7 @@
               <logsDirectory>logs</logsDirectory>
               <configurationDirectory>config</configurationDirectory>
               <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+              <binPrefix>app</binPrefix>
               <assembleDirectory>${project.build.directory}/app</assembleDirectory>
               <extraJvmArguments>-Djava.library.path=/usr/local/lib</extraJvmArguments>
               <repositoryLayout>flat</repositoryLayout>
@@ -201,7 +148,7 @@
               <useWildcardClassPath>true</useWildcardClassPath>
               <programs>
                 <program>
-                  <mainClass>l9g.photobox.App</mainClass>
+                  <mainClass>l9g.gpiotestpi4j.App</mainClass>
                   <id>app</id>
                 </program>
               </programs>
@@ -219,7 +166,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.1.1</version>
+            <version>3.7.0</version>
             <configuration>
               <descriptors>
                 <descriptor>src/main/assembly/app.xml</descriptor>
@@ -257,7 +204,7 @@
                 <configuration>
                   <executable>scp</executable>
                   <workingDirectory>target</workingDirectory>
-                  <commandlineArgs>photobox.jar photobox:photobox/lib</commandlineArgs>
+                  <commandlineArgs>gpiotestpi4j.jar photobox:gpiotestpi4j/lib</commandlineArgs>
                 </configuration>
               </execution>
               <execution>
@@ -268,7 +215,7 @@
                 </goals>
                 <configuration>
                   <executable>ssh</executable>
-                  <commandlineArgs>photobox export DISPLAY=:0.0; ./photobox/bin/app</commandlineArgs>
+                  <commandlineArgs>photobox ./gpiotestpi4j/bin/app</commandlineArgs>
                 </configuration>
               </execution>
             </executions>
@@ -278,5 +225,14 @@
     </profile>
 
   </profiles>
-
+    
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jackson.version>2.17.0</jackson.version>
+    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+    <build.timestamp>${maven.build.timestamp}</build.timestamp>
+    <slf4j.version>2.0.12</slf4j.version>
+    <pi4j.version>2.5.1</pi4j.version>
+    <maven.compiler.release>11</maven.compiler.release>
+  </properties>
 </project>

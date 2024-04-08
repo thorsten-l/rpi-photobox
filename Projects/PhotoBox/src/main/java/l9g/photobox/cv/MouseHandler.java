@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import l9g.photobox.App;
 import l9g.photobox.Config;
 
 /**
@@ -73,7 +72,7 @@ public class MouseHandler extends MouseAdapter
           && (System.currentTimeMillis() - yesButtonTimestamp) <= 1000)
         {
           LOGGER.info("Prepare shutdown...");
-          App.buttonLed.setBlink(true);
+          // App.buttonLed.setBlink(true);
           AppState.setState(AppState.PRESHUTDOWN);
         }
 

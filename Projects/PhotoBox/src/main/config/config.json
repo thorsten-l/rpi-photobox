@@ -1,6 +1,6 @@
 {
   "captureWidth" : 768,
-  "captureHeight" : 512,
+  "captureHeight" : 480,
   "bigFontHeight" : 300,
   "captureImageCommand" : "capture-image-and-download",
   "captureSleepTime" : 30,

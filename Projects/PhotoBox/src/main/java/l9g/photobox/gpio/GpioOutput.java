@@ -1,19 +1,17 @@
-package l9g.gpiotest.gpio;
+package l9g.photobox.gpio;
 
-//~--- non-JDK imports --------------------------------------------------------
-import jdk.dio.DeviceManager;
-import jdk.dio.gpio.GPIOPin;
-import jdk.dio.gpio.GPIOPinConfig;
-
+import com.pi4j.io.gpio.digital.DigitalOutput;
 import lombok.Getter;
 
 //~--- JDK imports ------------------------------------------------------------
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author th
  */
+@Slf4j
 public class GpioOutput
 {
 
@@ -30,44 +28,28 @@ public class GpioOutput
   {
     this.name = name;
     this.pinNumber = pinNumber;
-
-    //J--
-    GPIOPinConfig config = new GPIOPinConfig.Builder()
-            .setControllerNumber(0)
-            .setPinNumber(pinNumber).setDirection(GPIOPinConfig.DIR_OUTPUT_ONLY)
-            .setInitValue(false)
-            .build();
-    //J++
-
-    gpioPin = DeviceManager.open(GPIOPin.class, config);
+    gpioPin = GpioContext.getPi4JContext().digitalOutput().create(pinNumber);
   }
 
   public void setValue(boolean value) throws IOException
   {
-    gpioPin.setValue(value);
+    log.debug("setValue({})", value);
+    gpioPin.setState(value);
   }
 
   public boolean getValue() throws IOException
   {
-    return gpioPin.getValue();
+    return gpioPin.isHigh();
   }
 
   //~--- fields ---------------------------------------------------------------
-  /**
-   * Field description
-   */
+ 
   @Getter
-  private final GPIOPin gpioPin;
+  private final DigitalOutput gpioPin;
 
-  /**
-   * Field description
-   */
   @Getter
   private final String name;
 
-  /**
-   * Field description
-   */
   @Getter
   private final int pinNumber;
 }

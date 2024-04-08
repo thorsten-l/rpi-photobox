@@ -1,4 +1,4 @@
-package l9g.gpiotest.gpio;
+package l9g.gpiotestpi4j.gpio;
 
 /**
  * Interface description
