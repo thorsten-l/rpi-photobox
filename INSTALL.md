@@ -68,7 +68,7 @@ These changes switches to the legacy camera stack, required by JavaCV.
 
 - `raspi-config` 
 
-With Wayland java fullscreen mode does not work.
+With Wayland java fullscreen mode does not work. (black blank screen)
 
 ### RTC Hardware Clock
 
@@ -136,7 +136,3 @@ sudo apt install -y build-essential automake autoconf \
 ```
 
 use build scripts from `Projects/gphoto2`
-
-
-### Install packages required by JavaCV
-
