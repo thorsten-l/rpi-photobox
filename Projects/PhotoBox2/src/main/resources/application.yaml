@@ -1,0 +1,76 @@
+spring:
+
+  profiles:
+    active: default
+
+  application:
+    name: PhotoBox2
+
+  main:
+    banner-mode: off
+    web-application-type: none
+  
+  shell:
+    noninteractive:
+      primary-command: photobox
+
+logging:
+  file:
+    name: photobox2.log
+    path: logs
+  pattern:
+    console: "%date{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger:%line - %msg %n"
+  level:
+    root: INFO
+    l9g: TRACE
+    org.jline: OFF
+
+grabber:
+  width: 1200
+  height: 800
+  framerate: 15.0
+  codec: "mjpeg"
+  mode: "1640:1232:10:P"
+  roi: "0.1,0.1,0.8,0.8"
+  stream-url: "udp://0.0.0.0:9595"
+
+viewport:
+  width: 1280
+  height: 800
+  image:
+    width: 1200
+    height: 800
+  showfps-enabled: false
+  max-progress-time: 4000.0
+  info:
+    font-height: 64
+  countdown:
+    font-height: 300
+    x: 40
+    y: 240  
+  button:
+    gap: 20
+    height: 128
+    arc: 32
+
+gpio:
+  pin:
+    led: 21
+    shutter: 17
+
+gphoto-webapi:
+  command: >
+    /opt/gphoto2.5/bin/gphoto2-webapi,
+    --keep,
+    --server
+  url: "http://0.0.0.0:8866/api"
+  camera: "Canon EOS 7D"
+  directory: "/home/th/var"
+
+printer:
+  command:
+    find: "/home/th/FIND_PRINTER.sh"
+    print: "lp -d {0} {1}"
+    status: "lpstat -p {0}"
+    cancel: "cancel -a -x"
+    enable: "sudo lpadmin -p {0} -E"

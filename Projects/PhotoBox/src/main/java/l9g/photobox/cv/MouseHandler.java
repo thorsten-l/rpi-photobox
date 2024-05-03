@@ -72,7 +72,6 @@ public class MouseHandler extends MouseAdapter
           && (System.currentTimeMillis() - yesButtonTimestamp) <= 1000)
         {
           LOGGER.info("Prepare shutdown...");
-          // App.buttonLed.setBlink(true);
           AppState.setState(AppState.PRESHUTDOWN);
         }
 

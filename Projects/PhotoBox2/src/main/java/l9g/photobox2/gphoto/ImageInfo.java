@@ -13,32 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package l9g.photobox2.gpio;
+package l9g.photobox2.gphoto;
 
-import com.pi4j.Pi4J;
-import com.pi4j.context.Context;
-import lombok.extern.slf4j.Slf4j;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  *
  * @author Thorsten Ludewig (t.ludewig@gmail.com)
  */
-@Slf4j
-public class GpioContext
+@ToString
+@Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ImageInfo
 {
-  private final Context pi4j;
-
-  private static final GpioContext singleton = new GpioContext();
-
-  private GpioContext()
-  {
-    log.debug("GpioContext");
-    pi4j = Pi4J.newAutoContext();
-  }
- 
-  public static Context getPi4JContext()
-  {
-    log.debug("getPi4JContext");
-    return singleton.pi4j;
-  }
+  private String name;
+  private String folder;
+  private String path;
+  @JsonProperty("mtime")
+  private long modificationTime;
+  private long size;
+  private int height;
+  private int width;
+  private String type;
 }

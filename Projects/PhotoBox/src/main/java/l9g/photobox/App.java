@@ -1,7 +1,6 @@
 package l9g.photobox;
 
 //~--- non-JDK imports --------------------------------------------------------
-import java.awt.Container;
 import l9g.photobox.cv.BaseFrame;
 import l9g.photobox.gphoto2.GPhoto2Exception;
 import l9g.photobox.gphoto2.GPhoto2Handler;
@@ -23,7 +22,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.text.SimpleDateFormat;
@@ -31,7 +29,6 @@ import java.util.Enumeration;
 
 import java.util.Properties;
 import java.util.logging.Level;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import l9g.photobox.gpio.GpioOutput;
@@ -97,16 +94,18 @@ public class App implements GpioButtonListener
   }
 
   //~--- methods --------------------------------------------------------------
+
+  /*
   private static void setVsyncRequested(JFrame f, boolean b)
   {
     try
-    {
+    {     
       Class<?> tmpClass
         = Class.forName("com.sun.java.swing.SwingUtilities3");
       Method tmpMethod
         = tmpClass.
           getMethod("setVsyncRequested", Container.class, boolean.class);
-      tmpMethod.invoke(tmpClass, f, Boolean.valueOf(b));
+      tmpMethod.invoke(tmpClass, f, Boolean.valueOf(b));      
       LOGGER.info("VSync requested");
     }
     catch (Throwable ignore)
@@ -114,7 +113,7 @@ public class App implements GpioButtonListener
       LOGGER.error("Warning: Error while requesting vsync: " + ignore);
     }
   }
-
+   */
   /**
    * Method description
    *
@@ -266,6 +265,10 @@ public class App implements GpioButtonListener
       baseFrame.setAutoRequestFocus(true);
 
       Rectangle screenSize = device.getDefaultConfiguration().getBounds();
+      
+      LOGGER.info( "*** screen size : width={}, height={}", 
+        screenSize.width, screenSize.height);
+      
       Dimension appDimension = new Dimension(screenSize.width, screenSize.height);
 
       baseFrame.setPreferredSize(appDimension);
@@ -283,7 +286,7 @@ public class App implements GpioButtonListener
           log(Level.SEVERE, null, ex);
       }
       baseFrame.setVisible(true);
-      setVsyncRequested(baseFrame, true);
+      // setVsyncRequested(baseFrame, true);
     });
   }
 

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 //~--- JDK imports ------------------------------------------------------------
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -58,6 +59,10 @@ public class ViewPortPanel extends JPanel implements Runnable
    */
   public ViewPortPanel()
   {
+    setPreferredSize(new Dimension(1280,800));
+    setMinimumSize(new Dimension(1280,800));
+    setSize(1280,800);
+    
     counter = 0;
 
     config = Config.getInstance();
@@ -74,8 +79,8 @@ public class ViewPortPanel extends JPanel implements Runnable
     viewWidth = config.getViewWidth();
     viewHeight = config.getViewHeight();
 
-    LOGGER.debug("viewWidth={}", viewWidth);
-    LOGGER.debug("viewHeight={}", viewHeight);
+    LOGGER.debug("view port width={}", viewWidth);
+    LOGGER.debug("view port height={}", viewHeight);
 
     try
     {
@@ -124,6 +129,7 @@ public class ViewPortPanel extends JPanel implements Runnable
         - yesBounds.getBounds().width) / 2, yesButtonRectangle.y
         + fontHeightPx - (int) lineMetrics.getDescent()
         + (yesButtonRectangle.height - fontHeightPx) / 2);
+      
       noLabelPoint = new Point(noButtonRectangle.x + (noButtonRectangle.width
         - noBounds.getBounds().width) / 2, yesLabelPoint.y);
 
@@ -159,7 +165,7 @@ public class ViewPortPanel extends JPanel implements Runnable
 
       case PRINTPICTURE:
         image = GPhoto2Handler.getSnapshot();
-        g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
+        g2d.drawImage(image, 40, 0, 1200, 800, this);
         g2d.setFont(midFont);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
           RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -201,6 +207,9 @@ public class ViewPortPanel extends JPanel implements Runnable
         g2d.drawString("Shutdown?", messagePosX + 2, messagePosY + 2);
         g2d.setColor(Color.cyan);
         g2d.drawString("Shutdown?", messagePosX, messagePosY);
+        
+        g2d.setColor(Color.red);
+        g2d.drawRect(0, 0, 1279, 799);
 
         if ((System.currentTimeMillis() - AppState.getStateChangedTimestamp())
           >= 5000)
@@ -245,7 +254,7 @@ public class ViewPortPanel extends JPanel implements Runnable
             image.getWidth(), image.getHeight(), viewWidth, viewHeight);
           g2d.setColor(Color.black);
           g2d.fillRect(0, 0, viewWidth, viewHeight);
-          g2d.drawImage(image, 64, 0, 1152, 768, this);
+          g2d.drawImage(image, 40, 0, 1200, 800, this);
 
           g2d.setFont(midFont);
           g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -384,7 +393,7 @@ public class ViewPortPanel extends JPanel implements Runnable
           if (AppState.getState() != AppState.COUNTDOWN || counter > 2)
           {
             // g2d.drawImage(image, imageX, imageY, viewWidth, viewHeight, this);
-            g2d.drawImage(image, 64, 0, 1152, 768, this);
+            g2d.drawImage(image, 40, 0, 1200, 800, this);
           }
           else
           {
@@ -470,6 +479,8 @@ public class ViewPortPanel extends JPanel implements Runnable
     panelWidth = this.getWidth();
     panelHeight = this.getHeight();
 
+    LOGGER.debug( "*** panel width={}, height={}", panelWidth, panelHeight);
+    
     imageX = (panelWidth - config.getViewWidth()) / 2;
     imageY = (panelHeight - config.getViewHeight()) / 2;
   }

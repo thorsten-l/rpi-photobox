@@ -8,7 +8,6 @@
  
   <formats>
     <format>zip</format>
-    <!-- <format>tar.gz</format> -->
   </formats>
   
   <fileSets>
@@ -20,30 +19,13 @@
       <directoryMode>0700</directoryMode>
       <fileMode>0700</fileMode>
     </fileSet>
- 
-    <fileSet>
-      <directory>src/main/config</directory>
-      <filtered>false</filtered>
-      <outputDirectory>config</outputDirectory>
-      <directoryMode>0700</directoryMode>
-      <fileMode>0600</fileMode>
-    </fileSet>
 
     <fileSet>
       <directory>target/app/lib</directory>
       <filtered>false</filtered>
       <outputDirectory>lib</outputDirectory>
       <excludes>
-        <!-- jars for Raspberry Pi only -->
         <exclude>build.properties</exclude>
-        <exclude>*-armhf.*</exclude>
-        <exclude>*-x86.*</exclude>
-        <exclude>*-x86_64*</exclude>
-        <exclude>*-ppc*</exclude>
-        <exclude>*-android-*</exclude>
-        <exclude>*-ios-*</exclude>
-        <exclude>*-macosx-*</exclude>
-        <exclude>*-windows-*</exclude>
       </excludes>
       <directoryMode>0700</directoryMode>
       <fileMode>0600</fileMode>

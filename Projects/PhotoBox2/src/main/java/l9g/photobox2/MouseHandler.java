@@ -3,65 +3,52 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package l9g.photobox.cv;
+package l9g.photobox2;
 
-//~--- non-JDK imports --------------------------------------------------------
-import l9g.photobox.AppState;
-import l9g.photobox.Util;
-
-import org.slf4j.LoggerFactory;
-
-//~--- JDK imports ------------------------------------------------------------
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import l9g.photobox.Config;
+import static l9g.photobox2.AppState.PRINTINGFAILED;
+import l9g.photobox2.service.PrinterService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author th
  */
+@Slf4j
 public class MouseHandler extends MouseAdapter
 {
 
-  /**
-   * Field description
-   */
-  private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(
-    MouseHandler.class.getName());
-
-  //~--- constructors ---------------------------------------------------------
-  /**
-   * Constructs ...
-   *
-   *
-   * @param yesButtonRectangle
-   * @param noButtonRectangle
-   */
-  public MouseHandler(Rectangle yesButtonRectangle, Rectangle noButtonRectangle)
+  public MouseHandler(
+    Rectangle noButtonRectangle, Rectangle yesButtonRectangle,
+    ApplicationCommands applicationCommands,
+    PrinterService printerService)
   {
     this.yesButtonRectangle = yesButtonRectangle;
     this.noButtonRectangle = noButtonRectangle;
+    this.applicationCommands = applicationCommands;
+    this.printerService = printerService;
   }
 
   //~--- methods --------------------------------------------------------------
   @Override
   public void mouseClicked(MouseEvent e)
   {
-    LOGGER.debug("Mouse clicked at ({}|{})", e.getX(), e.getY());
+    log.debug("Mouse clicked at ({}|{})", e.getX(), e.getY());
 
     boolean yesButtonClicked = yesButtonRectangle.contains(e.getX(), e.getY());
     boolean noButtonClicked = noButtonRectangle.contains(e.getX(), e.getY());
 
     if (yesButtonClicked)
     {
-      LOGGER.debug("'Yes'-button clicked");
+      log.debug("'Yes'-button clicked");
       yesButtonTimestamp = System.currentTimeMillis();
     }
 
     if (noButtonClicked)
     {
-      LOGGER.debug("'No'-button clicked");
+      log.debug("'No'-button clicked");
     }
 
     switch (AppState.getState())
@@ -69,62 +56,65 @@ public class MouseHandler extends MouseAdapter
       case READY:
       case STANDBY:
         if (noButtonClicked
-          && (System.currentTimeMillis() - yesButtonTimestamp) <= 1000)
+          && (System.currentTimeMillis() - yesButtonTimestamp) <= 3000)
         {
-          LOGGER.info("Prepare shutdown...");
-          // App.buttonLed.setBlink(true);
+          log.info("Prepare shutdown...");
           AppState.setState(AppState.PRESHUTDOWN);
         }
-
         break;
 
       case PRINTQUESTION:
         if (noButtonClicked)
         {
-          AppState.setState(AppState.NOPRINT);
+          AppState.setState(AppState.STANDBY);
         }
-
         if (yesButtonClicked)
         {
-          if (Config.getInstance().isPrintingDisabled() == false)
+          if (printerService.isEnabled())
           {
             AppState.setState(AppState.YESPRINT);
-            Util.printPicture();
           }
           else
           {
-            LOGGER.info("Printing disabled");
+            AppState.setState(AppState.STANDBY);
           }
         }
-
         break;
 
       case PRINTINGFAILED:
-
         if (yesButtonClicked)
+        {
+          printerService.cancelAllPrintJobs();
+          printerService.enablePrintQueue();
+          if (printerService.checkPrinter())
+          {
+            AppState.setState(AppState.STANDBY);
+          }
+        }
+        break;
+
+      case PRESHUTDOWN:
+        if (yesButtonClicked)
+        {
+          applicationCommands.exitPhotobox();
+        }
+        if (noButtonClicked)
         {
           AppState.setState(AppState.STANDBY);
         }
-
         break;
 
       default:
     }
   }
 
-  //~--- fields ---------------------------------------------------------------
-  /**
-   * Field description
-   */
+  private final ApplicationCommands applicationCommands;
+
+  private final PrinterService printerService;
+
   private final Rectangle noButtonRectangle;
 
-  /**
-   * Field description
-   */
   private final Rectangle yesButtonRectangle;
 
-  /**
-   * Field description
-   */
   private long yesButtonTimestamp;
 }

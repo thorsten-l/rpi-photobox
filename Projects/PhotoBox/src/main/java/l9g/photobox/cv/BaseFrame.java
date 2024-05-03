@@ -68,15 +68,15 @@ public class BaseFrame extends javax.swing.JFrame
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     setBackground(java.awt.Color.black);
     addWindowListener(new java.awt.event.WindowAdapter()
+    {
+      public void windowOpened(java.awt.event.WindowEvent evt)
       {
-        public void windowOpened(java.awt.event.WindowEvent evt)
-        {
-          formWindowOpened(evt);
-        }
-      });
+        formWindowOpened(evt);
+      }
+    });
 
     pack();
-  }    // </editor-fold>//GEN-END:initComponents
+  }// </editor-fold>//GEN-END:initComponents
 
   //~--- fields ---------------------------------------------------------------
 
