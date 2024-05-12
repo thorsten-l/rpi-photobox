@@ -57,6 +57,16 @@ public class ApplicationCommands implements GpioButtonListener
   {
     log.info("Starting PhotoBox2");
 
+    Thread shutdownHook = new Thread(() ->
+    {
+      shutdownPhotobox();
+      System.out.println(AnsiColor.BG_RED.toString()
+        + AnsiColor.FG_BOLD_WHITE + "\n\n\n    EXIT\n\n"
+        + AnsiColor.RESET + "\n");
+    });
+    shutdownHook.setDaemon(true);
+    Runtime.getRuntime().addShutdownHook(shutdownHook);
+
     gpioTestMode = true;
     gpioTestFailed = true;
 
@@ -66,20 +76,19 @@ public class ApplicationCommands implements GpioButtonListener
     buttonLed = new GpioOutput("led", gpioLedPin);
     buttonLed.setValue(true);
 
-    System.out.println("\n\n#################################################");
-    System.out.println("#################################################");
-    
+    System.out.print(AnsiColor.BG_BLUE.toString()
+      + AnsiColor.FG_BOLD_BRIGHT_WHITE);
     System.out.println(
-      "\nGPIO Test\nBitte in den nächsten 5s\nden Auslöse-Taster drücken.\n");
-    System.out.println("#################################################");
-    System.out.println("#################################################");
+      "\n\n\n    *** GPIO Test ***\n    Bitte in den nächsten 5s"
+      + "\n    den Auslöse-Taster drücken.\n");
+    System.out.println(AnsiColor.RESET + "\n");
 
     Thread.sleep(5000);
 
     if (gpioTestFailed)
     {
       log.error("GPIO Test (Taster) fehlgeschlagen!");
-      exitPhotobox();
+      System.exit(-1);
     }
 
     gpioTestMode = false;
@@ -88,7 +97,7 @@ public class ApplicationCommands implements GpioButtonListener
     viewport.initialize(this);
     if (!gphotoWebApiService.checkCamera())
     {
-      exitPhotobox();
+      System.exit(0);
     }
     grabberService.start();
 
@@ -109,7 +118,7 @@ public class ApplicationCommands implements GpioButtonListener
         public void windowClosing(WindowEvent e)
         {
           System.out.println("exit application");
-          exitPhotobox();
+          System.exit(0);
         }
       });
 
@@ -124,7 +133,7 @@ public class ApplicationCommands implements GpioButtonListener
           {
             case KeyEvent.VK_Q:
             case KeyEvent.VK_ESCAPE:
-              exitPhotobox();
+              System.exit(0);
               break;
 
             case KeyEvent.VK_SPACE:
@@ -160,7 +169,7 @@ public class ApplicationCommands implements GpioButtonListener
     });
   }
 
-  public void exitPhotobox()
+  public void shutdownPhotobox()
   {
     log.info("exit photobox2");
     try
@@ -184,8 +193,8 @@ public class ApplicationCommands implements GpioButtonListener
       log.error("stop grabber", ex);
     }
     log.debug("exit - reset full screen window");
-    // graphicsDevice.setFullScreenWindow(null);
-    System.exit(0);
+    //graphicsDevice.setFullScreenWindow(null);
+    //System.exit(0);
   }
 
   @Override

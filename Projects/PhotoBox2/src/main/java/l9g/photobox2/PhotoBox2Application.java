@@ -48,14 +48,21 @@ public class PhotoBox2Application
   {
     return graphicsDevice.getDisplayMode();
   }
-  
+
   public static void main(String[] args) throws IOException
   {
     log.info("Starting PhotoBox2");
-    log.info( "{}", BuildProperties.toFormattedString() );
+    System.out.print(AnsiColor.BG_GREEN.code + AnsiColor.FG_BOLD_BRIGHT_WHITE);
+    System.out.println("\n\n\n    Starting PhotoBox2\n");
+    System.out.println(AnsiColor.RESET + "\n");
+
+    log.info("{}", BuildProperties.toFormattedString());
     if (!System.getProperty("os.name").equalsIgnoreCase("Linux"))
     {
-      log.error("PhotoBox2 is designed for Linux/RaspberryPi OS only.");
+      System.out.println(
+        AnsiColor.BG_RED.code + AnsiColor.FG_BOLD_WHITE
+        + "\n\n\n    PhotoBox2 is designed for Linux/RaspberryPi OS only.\n\n"
+        + AnsiColor.RESET.toString() + "\n");
       System.exit(0);
     }
     System.setProperty("java.awt.headless", "false");

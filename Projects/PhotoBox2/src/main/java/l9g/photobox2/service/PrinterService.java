@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.Map;
+import l9g.photobox2.AnsiColor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,9 +83,9 @@ public class PrinterService
     {
       printerCommandFind
     });
-    log.debug("Printer=" + "\n----------------------------------------" + "\n{}"
-      + "\n----------------------------------------",
-      findPrinter);
+    log.debug("\n" + AnsiColor.BG_BRIGHT_YELLOW + AnsiColor.FG_BOLD_BLUE
+      + "\n\n\n    Printer = {}\n\n"
+      + AnsiColor.RESET + "\n", findPrinter);
     int index = findPrinter.indexOf("PRINTER_NAME=");
     if (index > 0)
     {
@@ -145,15 +146,14 @@ public class PrinterService
 
     return success;
   }
-  
-  
+
   public void cancelAllPrintJobs()
   {
     log.debug("cancel all print jobs command = {}", printerCommandCancel);
     String result = runCommand(printerCommandCancel.split("\\s"));
     log.debug("cancel all print jobs result = {}", result);
   }
-  
+
   public void enablePrintQueue()
   {
     String commandLine = MessageFormat.format(printerCommandEnable, deviceName);
@@ -161,7 +161,6 @@ public class PrinterService
     String result = runCommand(commandLine.split("\\s"));
     log.debug("print enable queue result = {}", result);
   }
-  
 
   @Value("${printer.command.find}")
   private String printerCommandFind;

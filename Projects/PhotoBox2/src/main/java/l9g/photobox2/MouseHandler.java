@@ -103,7 +103,7 @@ public class MouseHandler extends MouseAdapter
       case PRESHUTDOWN:
         if (yesButtonClicked)
         {
-          applicationCommands.exitPhotobox();
+          System.exit(0);
         }
         if (noButtonClicked)
         {

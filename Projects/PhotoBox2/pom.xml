@@ -72,14 +72,6 @@
       <classifier>${javacv.platform}</classifier>
     </dependency>
 
-    <!--
-        <dependency>
-          <groupId>org.bytedeco</groupId>
-          <artifactId>javacv-platform</artifactId>
-          <version>1.5.10</version>
-        </dependency>
-    -->
-
     <!-- include Pi4J Core -->
     <dependency>
       <groupId>com.pi4j</groupId>
@@ -144,7 +136,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.1.2</version>
+            <version>3.6.1</version>
             <executions>
               <execution>
                 <id>copy-dependencies</id>
@@ -213,7 +205,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.1.1</version>
+            <version>3.7.1</version>
             <configuration>
               <descriptors>
                 <descriptor>src/main/assembly/app.xml</descriptor>
@@ -232,12 +224,8 @@
       </build>
     </profile>
 
-
-    
-    
-    
     <profile>
-      <id>run-on-photobox</id>
+      <id>remote-run-on-photobox</id>
       
       <build>
         <plugins>
@@ -274,7 +262,34 @@
         </plugins>
       </build>
     </profile>
+    
+    <profile>
+      <id>remote-copy-to-photobox</id>
+      
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>copy-to-photobox</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>scp</executable>
+                  <workingDirectory>target</workingDirectory>
+                  <commandlineArgs>PhotoBox2.jar photobox:PhotoBox2/lib/photobox.jar</commandlineArgs>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
   </profiles>
-
-
 </project>
