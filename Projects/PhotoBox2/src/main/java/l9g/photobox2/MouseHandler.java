@@ -93,6 +93,13 @@ public class MouseHandler extends MouseAdapter
         }
         break;
 
+      case ERROR:
+        if (yesButtonClicked)
+        {
+          AppState.setState(AppState.STANDBY);
+        }
+        break;
+
       case PRESHUTDOWN:
         if (yesButtonClicked)
         {

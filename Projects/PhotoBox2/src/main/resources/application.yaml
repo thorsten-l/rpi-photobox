@@ -66,6 +66,8 @@ gphoto-webapi:
   url: "http://0.0.0.0:8866/api"
   camera: "Canon EOS 7D"
   directory: "/home/th/var"
+  capture:
+    timeout: 10000
 
 printer:
   command:

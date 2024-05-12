@@ -21,6 +21,7 @@ import java.util.Arrays;
 import l9g.photobox2.gphoto.AutoDetectResponse;
 import l9g.photobox2.gphoto.CapturedImageResponse;
 import l9g.photobox2.gphoto.ShutdownResponse;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -33,22 +34,26 @@ import org.springframework.web.client.RestClient;
  */
 @Service
 @Slf4j
+@Getter
 public class GphotoWebApiService
 {
   @Value("${gphoto-webapi.url}")
   private String gphotoWebApiUrl;
-
+  
   @Value("${gphoto-webapi.camera}")
   private String gphotoWebApiCamera;
-
+  
   @Value("${gphoto-webapi.command}")
   private String[] gphotoWebApiCommand;
-
+  
   @Value("${gphoto-webapi.directory}")
   private String gphotoWebApiDirectory;
-
+  
+  @Value("${gphoto-webapi.capture.timeout}")
+  private long gphotoWebApiCaptureTimeout;
+  
   private RestClient restClient;
-
+  
   @PostConstruct
   public void initialize()
   {
@@ -56,13 +61,13 @@ public class GphotoWebApiService
     restClient = RestClient.builder()
       .baseUrl(gphotoWebApiUrl)
       .build();
-    running = false;
   }
-
-  public synchronized void start() throws Exception
+  
+  public synchronized void check() throws Exception
   {
-    if (!running)
+    if ((gphotoWebApiProcess == null || !gphotoWebApiProcess.isAlive()))
     {
+      log.debug("starting gphoto-webapi");
       ProcessBuilder builder = new ProcessBuilder();
       builder.command(Arrays.asList(gphotoWebApiCommand));
       File directory = new File(gphotoWebApiDirectory);
@@ -78,21 +83,20 @@ public class GphotoWebApiService
         throw new Exception("gphoto-webapi not started");
       }
       log.debug("gphoto-webapi started");
-      running = true;
     }
   }
-
-  public void stop() throws InterruptedException
+  
+  public synchronized void stop() throws InterruptedException
   {
-    log.debug("stopping = {}", running);
-    if (running && gphotoWebApiProcess.isAlive())
+    log.debug("stopping gphoto-webapi");
+    if (gphotoWebApiProcess != null && gphotoWebApiProcess.isAlive())
     {
       log.debug("send server shutdown");
       ResponseEntity<ShutdownResponse> entity = restClient
         .get()
         .uri("/server/shutdown")
         .retrieve().toEntity(ShutdownResponse.class);
-
+      
       if (entity.getStatusCode().is2xxSuccessful())
       {
         log.info("return_code={}", entity.getBody().getReturnCode());
@@ -101,7 +105,7 @@ public class GphotoWebApiService
       {
         log.error("Shutdown request NOT successful.");
       }
-
+      
       log.debug("sleep 1000");
       Thread.sleep(1000);
       if (gphotoWebApiProcess.isAlive())
@@ -109,7 +113,6 @@ public class GphotoWebApiService
         log.debug("destroy process");
         gphotoWebApiProcess.destroy();
       }
-      running = false;
       log.debug("stopped");
     }
     else
@@ -117,17 +120,19 @@ public class GphotoWebApiService
       log.debug("not running");
     }
     log.debug("stop - done.");
+    gphotoWebApiProcess = null;
   }
-
-  public AutoDetectResponse autoDetect()
+  
+  public AutoDetectResponse autoDetect() throws Exception
   {
+    check();
     AutoDetectResponse response = null;
-
+    
     ResponseEntity<AutoDetectResponse> entity = restClient
       .get()
       .uri("/auto-detect")
       .retrieve().toEntity(AutoDetectResponse.class);
-
+    
     if (entity.getStatusCode().is2xxSuccessful())
     {
       response = entity.getBody();
@@ -137,11 +142,11 @@ public class GphotoWebApiService
     {
       log.error("Auto detect request NOT successful.");
     }
-
+    
     return response;
   }
-
-  public boolean checkCamera()
+  
+  public boolean checkCamera() throws Exception
   {
     log.debug("check for camera: {}", gphotoWebApiCamera);
     AutoDetectResponse autoDetected = autoDetect();
@@ -149,31 +154,37 @@ public class GphotoWebApiService
       && autoDetected.getConnections()[0].getModel()
         .equalsIgnoreCase(gphotoWebApiCamera));
   }
-
+  
   public CapturedImageResponse captureImageDownload()
   {
     CapturedImageResponse response = null;
-
-    ResponseEntity<CapturedImageResponse> entity = restClient
-      .get()
-      .uri("/capture-image-download")
-      .retrieve().toEntity(CapturedImageResponse.class);
-
-    if (entity.getStatusCode().is2xxSuccessful())
+    
+    try
     {
-      response = entity.getBody();
-      log.debug("capture-image-download={}", response);
+      check();
+      
+      ResponseEntity<CapturedImageResponse> entity = restClient
+        .get()
+        .uri("/capture-image-download")
+        .retrieve().toEntity(CapturedImageResponse.class);
+      
+      if (entity.getStatusCode().is2xxSuccessful())
+      {
+        response = entity.getBody();
+        log.debug("capture-image-download={}", response);
+      }
+      else
+      {
+        log.error("capture image and download request NOT successful.");
+      }
     }
-    else
+    catch (Throwable t)
     {
-      log.error("capture image and download request NOT successful.");
+      log.error("ERROR: during capture image and download.", t);
     }
-
     log.debug("response={}", response);
     return response;
   }
-
+  
   private Process gphotoWebApiProcess;
-
-  private boolean running;
 }

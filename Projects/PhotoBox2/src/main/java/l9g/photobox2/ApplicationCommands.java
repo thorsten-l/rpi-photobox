@@ -66,8 +66,13 @@ public class ApplicationCommands implements GpioButtonListener
     buttonLed = new GpioOutput("led", gpioLedPin);
     buttonLed.setValue(true);
 
+    System.out.println("\n\n#################################################");
+    System.out.println("#################################################");
+    
     System.out.println(
-      "\n\nGPIO Test\nBitte in den nächsten 5s\nden Auslöse-Taster drücken.\n");
+      "\nGPIO Test\nBitte in den nächsten 5s\nden Auslöse-Taster drücken.\n");
+    System.out.println("#################################################");
+    System.out.println("#################################################");
 
     Thread.sleep(5000);
 
@@ -81,7 +86,6 @@ public class ApplicationCommands implements GpioButtonListener
 
     ///////////////////////////////////////////////////////////////////////////
     viewport.initialize(this);
-    gphotoWebApiService.start();
     if (!gphotoWebApiService.checkCamera())
     {
       exitPhotobox();

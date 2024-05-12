@@ -30,9 +30,12 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import static l9g.photobox2.AppState.LOADPICTURE;
+import static l9g.photobox2.AppState.PRINTINGFAILED;
 import static l9g.photobox2.AppState.PRINTPICTURE;
 import static l9g.photobox2.AppState.PRINTQUESTION;
 import static l9g.photobox2.AppState.READY;
@@ -98,7 +101,7 @@ public class ViewPortPanel extends JPanel implements Runnable
     Rectangle yesButton = new Rectangle(
       viewportWidth / 2 + buttonGap - 1, buttonPosY, buttonWidth, buttonHeight);
 
-    MouseHandler mouseHandler = new MouseHandler( 
+    MouseHandler mouseHandler = new MouseHandler(
       noButton, yesButton, applicationCommands, printerService);
 
     addMouseListener(mouseHandler);
@@ -110,35 +113,72 @@ public class ViewPortPanel extends JPanel implements Runnable
     g.fillRect(0, 0, this.getWidth(), this.getHeight());
   }
 
+  private Thread captureWorker;
+
+  private Thread captureMonitor;
+
+  private boolean captureImageDownloadFinished;
+
   private void takePicture()
   {
-    Thread captureWorker = new Thread(() ->
+    captureWorker = new Thread(() ->
     {
-      if ((capturedImageResponse = gphotoService.captureImageDownload()) != null)
+      captureImageDownloadFinished = false;
+      try
       {
-        AppState.setState(AppState.LOADPICTURE);
+        if ((capturedImageResponse = gphotoService.captureImageDownload())
+          != null)
+        {
+          AppState.setState(AppState.LOADPICTURE);
+        }
+        else
+        {
+          AppState.setState(AppState.ERROR, "Kamerafehler!");
+        }
       }
-      else
+      catch (Throwable t)
       {
-        AppState.setState(AppState.ERROR, "Kamerafehler!");
+        log.error("capture worker error or interrupted", t);
       }
+      captureImageDownloadFinished = true;
+      captureMonitor.interrupt();
     });
     captureWorker.setName("captureWorker");
     captureWorker.setDaemon(true);
     captureWorker.start();
+
+    captureMonitor = new Thread(() ->
+    {
+      try
+      {
+        Thread.sleep(gphotoService.getGphotoWebApiCaptureTimeout());
+      }
+      catch (InterruptedException ex)
+      {
+        log.debug("capture monitor interrupted");
+      }
+      if (captureImageDownloadFinished == false)
+      {
+        AppState.setState(AppState.ERROR, "Kamerafehler! - Timeout");
+        captureWorker.interrupt();
+      }
+    });
+    captureMonitor.setName("captureMonitor");
+    captureMonitor.setDaemon(true);
+    captureMonitor.start();
   }
 
   void showMessage(boolean errorMessage, String message)
   {
     g.setFont(infoFont);
-    g.setColor(Color.darkGray);    
+    g.setColor(Color.darkGray);
     g.drawString(message, 42, viewportHeight - buttonHeight - (buttonGap * 2)
       + 2);
-    if ( errorMessage)
+    if (errorMessage)
     {
-      g.fillRoundRect(0, 560, viewportWidth-1, 100, buttonArc, buttonArc);
+      g.fillRoundRect(0, 560, viewportWidth - 1, 100, buttonArc, buttonArc);
       g.setColor(Color.lightGray);
-      g.drawRoundRect(0, 560, viewportWidth-1, 100, buttonArc, buttonArc);
+      g.drawRoundRect(0, 560, viewportWidth - 1, 100, buttonArc, buttonArc);
       g.setColor(Color.red);
     }
     else
@@ -270,12 +310,6 @@ public class ViewPortPanel extends JPanel implements Runnable
       }
       break;
 
-      case ERROR:
-      {
-        AppState.setState(AppState.STANDBY);
-      }
-      break;
-
       case PRESHUTDOWN:
       {
         if (doOnce)
@@ -319,7 +353,7 @@ public class ViewPortPanel extends JPanel implements Runnable
           && capturedImageResponse.getImages()[0] != null)
         {
           log.debug("PRINT");
-          if( printerService.print(
+          if (printerService.print(
             capturedImageResponse.getImages()[0].getLocalFolder(),
             capturedImageResponse.getImages()[0].getInfo().getName()))
           {
@@ -349,7 +383,7 @@ public class ViewPortPanel extends JPanel implements Runnable
           g.drawImage(snapshot, videoPosX, 0, imageWidth, imageHeight, null);
           showMessage("Bild wird gedruckt...");
         }
-        
+
         if ((System.currentTimeMillis() - AppState.getStateChangedTimestamp())
           >= 10000)
         {
@@ -373,9 +407,21 @@ public class ViewPortPanel extends JPanel implements Runnable
           doOnce = false;
           clearScreen(Color.BLACK);
           g.drawImage(snapshot, videoPosX, 0, imageWidth, imageHeight, null);
-          showMessage( true, printerService.getErrorMessage());
+          showMessage(true, printerService.getErrorMessage());
           showYesButton("WEITER");
-        }      
+        }
+      }
+      break;
+
+      case ERROR:
+      {
+        // if (doOnce)
+        {
+          doOnce = false;
+          clearScreen(Color.BLACK);
+          showMessage(true, AppState.getMessage());
+          showYesButton("WEITER");
+        }
       }
       break;
 
