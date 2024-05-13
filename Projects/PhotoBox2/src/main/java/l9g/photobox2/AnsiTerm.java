@@ -19,13 +19,13 @@ package l9g.photobox2;
  *
  * @author Thorsten Ludewig (t.ludewig@gmail.com)
  */
-public enum AnsiColor
+public enum AnsiTerm
 {
   //Color end string, color reset
   RESET("\033[0m"),
-  
+  CLEAR_SCREEN("\033[2J"),
   // Regular Colors
-  FG_BLACK("\033[0;30m"), 
+  FG_BLACK("\033[0;30m"),
   FG_RED("\033[0;31m"),
   FG_GREEN("\033[0;32m"),
   FG_YELLOW("\033[0;33m"),
@@ -33,17 +33,15 @@ public enum AnsiColor
   FG_MAGENTA("\033[0;35m"),
   FG_CYAN("\033[0;36m"),
   FG_WHITE("\033[0;37m"),
-
   // Bold
-  FG_BOLD_BLACK("\033[1;30m"), 
-  FG_BOLD_RED("\033[1;31m"), 
-  FG_BOLD_GREEN("\033[1;32m"), 
-  FG_BOLD_YELLOW("\033[1;33m"), 
-  FG_BOLD_BLUE("\033[1;34m"), 
-  FG_BOLD_MAGENTA("\033[1;35m"), 
+  FG_BOLD_BLACK("\033[1;30m"),
+  FG_BOLD_RED("\033[1;31m"),
+  FG_BOLD_GREEN("\033[1;32m"),
+  FG_BOLD_YELLOW("\033[1;33m"),
+  FG_BOLD_BLUE("\033[1;34m"),
+  FG_BOLD_MAGENTA("\033[1;35m"),
   FG_BOLD_CYAN("\033[1;36m"),
   FG_BOLD_WHITE("\033[1;37m"),
-
   // Underline
   FG_UNDERLINED_BLACK("\033[4;30m"),
   FG_UNDERLINED_RED("\033[4;31m"),
@@ -53,7 +51,6 @@ public enum AnsiColor
   FG_UNDERLINED_MAGENTA("\033[4;35m"),
   FG_UNDERLINED_CYAN("\033[4;36m"),
   FG_UNDERLINED_WHITE("\033[4;37m"),
-
   // Bright
   FG_BRIGHT_BLACK("\033[0;90m"),
   FG_BRIGHT_RED("\033[0;91m"),
@@ -63,7 +60,6 @@ public enum AnsiColor
   FG_BRIGHT_MAGENTA("\033[0;95m"),
   FG_BRIGHT_CYAN("\033[0;96m"),
   FG_BRIGHT_WHITE("\033[0;97m"),
-
   // Bold & Bright
   FG_BOLD_BRIGHT_BLACK("\033[1;90m"),
   FG_BOLD_BRIGHT_RED("\033[1;91m"),
@@ -73,7 +69,6 @@ public enum AnsiColor
   FG_BOLD_BRIGHT_MAGENTA("\033[1;95m"),
   FG_BOLD_BRIGHT_CYAN("\033[1;96m"),
   FG_BOLD_BRIGHT_WHITE("\033[1;97m"),
-
   // Background
   BG_BLACK("\033[40m"),
   BG_RED("\033[41m"),
@@ -83,7 +78,6 @@ public enum AnsiColor
   BG_MAGENTA("\033[45m"),
   BG_CYAN("\033[46m"),
   BG_WHITE("\033[47m"),
-
   // Background Bright
   BG_BRIGHT_BLACK("\033[0;100m"),
   BG_BRIGHT_RED("\033[0;101m"),
@@ -96,7 +90,7 @@ public enum AnsiColor
 
   public final String code;
 
-  AnsiColor(String code)
+  AnsiTerm(String code)
   {
     this.code = code;
   }
@@ -105,5 +99,21 @@ public enum AnsiColor
   public String toString()
   {
     return code;
+  }
+
+  public static void printColorTable()
+  {
+    System.out.println(CLEAR_SCREEN + "\nANSI Terminal Color Table");
+
+    for (int i = 0; i < 16; i++)
+    {
+      for (int j = 0; j < 16; j++)
+      {
+        int c = i * 16 + j;
+        System.out.printf("\033[38;5;%dm %3s", c, Integer.toString(c));
+      }
+      System.out.println();
+    }
+    System.out.println();
   }
 }

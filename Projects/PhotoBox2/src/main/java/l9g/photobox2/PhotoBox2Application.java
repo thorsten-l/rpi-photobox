@@ -49,18 +49,18 @@ public class PhotoBox2Application
 
   public static void main(String[] args) throws IOException
   {
-    log.info("Starting PhotoBox2" + AnsiColor.RESET);
-    System.out.println(AnsiColor.RESET + "\n");
-    System.out.println(AnsiColor.BG_GREEN.code + AnsiColor.FG_BOLD_BRIGHT_WHITE);
+    System.out.println(AnsiTerm.CLEAR_SCREEN + "\n");
+    log.info("Starting PhotoBox2" + AnsiTerm.RESET);
+    System.out.println(AnsiTerm.BG_GREEN.code + AnsiTerm.FG_BOLD_BRIGHT_WHITE);
     System.out.println("\n\n    Starting PhotoBox2\n");
-    System.out.println(AnsiColor.RESET + "\n");
+    System.out.println(AnsiTerm.RESET + "\n");
 
     if (!System.getProperty("os.name").equalsIgnoreCase("Linux"))
     {
       System.out.println(
-        AnsiColor.BG_RED.code + AnsiColor.FG_BOLD_WHITE
+        AnsiTerm.BG_RED.code + AnsiTerm.FG_BOLD_WHITE
         + "\n\n\n    PhotoBox2 is designed for Linux/RaspberryPi OS only.\n\n"
-        + AnsiColor.RESET.toString() + "\n");
+        + AnsiTerm.RESET.toString() + "\n");
 
       if (!"true".equals(System.getProperty("spring.aot.processing")))
       {

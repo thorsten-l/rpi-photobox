@@ -69,9 +69,9 @@ public class ApplicationCommands implements ApplicationRunner,
     Thread shutdownHook = new Thread(() ->
     {
       shutdownPhotobox();
-      System.out.println(AnsiColor.BG_RED.toString()
-        + AnsiColor.FG_BOLD_WHITE + "\n\n\n    EXIT\n\n"
-        + AnsiColor.RESET + "\n");
+      System.out.println(AnsiTerm.BG_RED.toString()
+        + AnsiTerm.FG_BOLD_WHITE + "\n\n\n    EXIT\n\n"
+        + AnsiTerm.RESET + "\n");
     });
     shutdownHook.setDaemon(true);
     Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -85,12 +85,12 @@ public class ApplicationCommands implements ApplicationRunner,
     buttonLed = new GpioOutput("led", gpioLedPin);
     buttonLed.setValue(true);
 
-    System.out.print(AnsiColor.BG_BLUE.toString()
-      + AnsiColor.FG_BOLD_BRIGHT_WHITE);
+    System.out.print(AnsiTerm.BG_BLUE.toString()
+      + AnsiTerm.FG_BOLD_BRIGHT_WHITE);
     System.out.println(
       "\n\n\n    *** GPIO Test ***\n    Bitte in den nächsten 5s"
       + "\n    den Auslöse-Taster drücken.\n");
-    System.out.println(AnsiColor.RESET + "\n");
+    System.out.println(AnsiTerm.RESET + "\n");
 
     Thread.sleep(5000);
 

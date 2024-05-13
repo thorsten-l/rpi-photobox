@@ -20,7 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.Map;
-import l9g.photobox2.AnsiColor;
+import l9g.photobox2.AnsiTerm;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,9 +83,9 @@ public class PrinterService
     {
       printerCommandFind
     });
-    log.debug("\n" + AnsiColor.BG_BRIGHT_YELLOW + AnsiColor.FG_BOLD_BLUE
+    log.debug("\n" + AnsiTerm.BG_BRIGHT_YELLOW + AnsiTerm.FG_BOLD_BLUE
       + "\n\n\n    Printer = {}\n\n"
-      + AnsiColor.RESET + "\n", findPrinter);
+      + AnsiTerm.RESET + "\n", findPrinter);
     int index = findPrinter.indexOf("PRINTER_NAME=");
     if (index > 0)
     {
