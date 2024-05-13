@@ -24,6 +24,7 @@
     <javacv.platform>linux-arm64</javacv.platform>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
     <build.timestamp>${maven.build.timestamp}</build.timestamp>
+    <native-image.properties>org.jline.jline-terminal.native-image.UnlockExperimentalVMOptions=false</native-image.properties>
   </properties>
   
   <dependencies>
@@ -37,6 +38,7 @@
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacv</artifactId>
@@ -104,32 +106,29 @@
       </resource>
     </resources>
 
+    <plugins>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+
   </build>
 
   <profiles>
-    
-    <profile>
-      <id>build-single-jar</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <configuration>
-              <executable>true</executable>
-              <mainClass>l9g.photobox2.PhotoBox2Application</mainClass>
-              <excludes>
-                <exclude>
-                  <groupId>org.projectlombok</groupId>
-                  <artifactId>lombok</artifactId>
-                </exclude>
-              </excludes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    
+ 
     <profile>
       <id>build-app</id>
 

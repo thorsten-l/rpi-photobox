@@ -23,10 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.shell.command.annotation.CommandScan;
 
 @SpringBootApplication
-@CommandScan
 @Slf4j
 public class PhotoBox2Application
 {
@@ -51,20 +49,25 @@ public class PhotoBox2Application
 
   public static void main(String[] args) throws IOException
   {
-    log.info("Starting PhotoBox2");
-    System.out.print(AnsiColor.BG_GREEN.code + AnsiColor.FG_BOLD_BRIGHT_WHITE);
-    System.out.println("\n\n\n    Starting PhotoBox2\n");
+    log.info("Starting PhotoBox2" + AnsiColor.RESET);
+    System.out.println(AnsiColor.RESET + "\n");
+    System.out.println(AnsiColor.BG_GREEN.code + AnsiColor.FG_BOLD_BRIGHT_WHITE);
+    System.out.println("\n\n    Starting PhotoBox2\n");
     System.out.println(AnsiColor.RESET + "\n");
 
-    log.info("{}", BuildProperties.toFormattedString());
     if (!System.getProperty("os.name").equalsIgnoreCase("Linux"))
     {
       System.out.println(
         AnsiColor.BG_RED.code + AnsiColor.FG_BOLD_WHITE
         + "\n\n\n    PhotoBox2 is designed for Linux/RaspberryPi OS only.\n\n"
         + AnsiColor.RESET.toString() + "\n");
-      System.exit(0);
+
+      if (!"true".equals(System.getProperty("spring.aot.processing")))
+      {
+        System.exit(0);
+      }
     }
+
     System.setProperty("java.awt.headless", "false");
     AppState.setState(AppState.STARTUP);
     SpringApplication.run(PhotoBox2Application.class, args);

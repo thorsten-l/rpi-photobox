@@ -31,16 +31,19 @@ import l9g.photobox2.service.GphotoWebApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.shell.command.annotation.Command;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author th
  */
-@Command(group = "Application")
 @Slf4j
 @RequiredArgsConstructor
-public class ApplicationCommands implements GpioButtonListener
+@Component
+public class ApplicationCommands implements ApplicationRunner,
+                                            GpioButtonListener
 {
   private final GphotoWebApiService gphotoWebApiService;
 
@@ -52,7 +55,13 @@ public class ApplicationCommands implements GpioButtonListener
 
   private final GraphicsDevice graphicsDevice;
 
-  @Command(description = "start photobox2 application")
+  @Override
+  public void run(ApplicationArguments args) throws Exception
+  {
+    log.info("{}", BuildProperties.toFormattedString());
+    photobox();
+  }
+
   public void photobox() throws Exception
   {
     log.info("Starting PhotoBox2");
