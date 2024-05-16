@@ -44,12 +44,12 @@ int main(void)
         if ( duration_us > 500000l )
         {
           // printf( "%ldus -> %s\n", duration_us, buffer );
-          if ( strstr( buffer, "5: hi ") != NULL )
+          if ( strstr( buffer, GPIO_PIN_REBOOT ": hi ") != NULL )
           {
             puts( "REBOOT system");
             system(SUDO REBOOT_COMMAND);
           }
-          if ( strstr( buffer, "7: hi ") != NULL )
+          if ( strstr( buffer, GPIO_PIN_POWEROFF ": hi ") != NULL )
           {
             puts( "POWEROFF system");
             system(SUDO POWEROFF_COMMAND);
