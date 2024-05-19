@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cd opencv-3.4.6/build
-make -j 4
-

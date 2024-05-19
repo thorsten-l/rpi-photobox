@@ -28,7 +28,7 @@ mv /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/bellsoft.gpg
 
 ```bash
 apt update
-apt install -y bellsoft-java11
+apt install -y bellsoft-java17
 apt install -y sysvbanner unclutter
 ```
 
@@ -41,28 +41,6 @@ apt install -y sysvbanner unclutter
 ```text
 console=serial0,115200 console=tty1 root=PARTUUID=89d32b3c-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=DE
 ```
-
-### Switch to legacy camera stack
-
-https://forums.raspberrypi.com/viewtopic.php?t=323390
-
-- edit `/boot/firmware/config.txt`
-  
-- disable camera auto detection
-  
-```
-# camera_auto_detect=1
-```
-
-  - add at the end of the file
-
-```text
-[all]
-start_x=1
-gpu_mem=128
-````
-
-These changes switches to the legacy camera stack, required by JavaCV.
 
 ### Use X11 and NOT Wayland
 

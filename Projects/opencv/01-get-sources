@@ -1,4 +1,0 @@
-#!/bin/bash
-
-wget https://github.com/opencv/opencv/archive/3.4.6.tar.gz
-
