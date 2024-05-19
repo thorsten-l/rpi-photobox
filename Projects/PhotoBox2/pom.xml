@@ -80,6 +80,7 @@
       <artifactId>pi4j-plugin-raspberrypi</artifactId>
       <version>${pi4j.version}</version>
     </dependency>
+   
     <dependency>
       <groupId>com.pi4j</groupId>
       <artifactId>pi4j-plugin-gpiod</artifactId>
@@ -90,6 +91,13 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
+    </dependency>
+    
+    <!-- USB serial port communication --> 
+    <dependency>
+      <groupId>com.fazecast</groupId>
+      <artifactId>jSerialComm</artifactId>
+      <version>2.11.0</version>
     </dependency>
     
   </dependencies>

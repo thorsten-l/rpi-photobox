@@ -18,7 +18,6 @@ package l9g.photobox2;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -47,7 +46,7 @@ public class PhotoBox2Application
     return graphicsDevice.getDisplayMode();
   }
 
-  public static void main(String[] args) throws IOException
+  public static void main(String[] args)
   {
     System.out.println(AnsiTerm.CLEAR_SCREEN + "\n");
     log.info("Starting PhotoBox2" + AnsiTerm.RESET);

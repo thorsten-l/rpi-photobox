@@ -44,6 +44,7 @@ import static l9g.photobox2.AppState.YESPRINT;
 import l9g.photobox2.gphoto.CapturedImage;
 import l9g.photobox2.gphoto.CapturedImageResponse;
 import l9g.photobox2.service.GphotoWebApiService;
+import l9g.photobox2.service.NeoPixelRingService;
 import l9g.photobox2.service.PrinterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +73,8 @@ public class ViewPortPanel extends JPanel implements Runnable
   private final GphotoWebApiService gphotoService;
 
   private final PrinterService printerService;
+  
+  private final NeoPixelRingService neoPixelService;
 
   void initialize(ApplicationCommands applicationCommands)
   {
@@ -273,6 +276,7 @@ public class ViewPortPanel extends JPanel implements Runnable
           if (doOnce)
           {
             doOnce = false;
+            neoPixelService.off();
             clearScreen(Color.BLACK);
             g.setColor(Color.cyan);
             g.setFont(infoFont);
@@ -403,6 +407,7 @@ public class ViewPortPanel extends JPanel implements Runnable
         if (doOnce)
         {
           doOnce = false;
+          neoPixelService.red();
           clearScreen(Color.BLACK);
           g.drawImage(snapshot, videoPosX, 0, imageWidth, imageHeight, null);
           showMessage(true, printerService.getErrorMessage());
@@ -456,7 +461,7 @@ public class ViewPortPanel extends JPanel implements Runnable
         }
 
         if (AppState.getState() == AppState.COUNTDOWN)
-        {
+        {          
           if (counter <= 2)
           {
             clearScreen(Color.black);
@@ -495,6 +500,16 @@ public class ViewPortPanel extends JPanel implements Runnable
 
           if (System.currentTimeMillis() - timestamp >= 1000)
           {
+            if ( counter == 4 )
+            {
+              neoPixelService.run();
+            }
+            
+            if ( counter == 2 )
+            {
+               neoPixelService.flash();
+            }
+            
             timestamp = System.currentTimeMillis();
             counter--;
             if (counter == 0)
