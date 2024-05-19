@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>l9g.photobox</groupId>
+  <artifactId>GPIOtest</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <packaging>jar</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>32.1.2-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>io.earcam.wrapped</groupId>
+      <artifactId>org.openjdk.dio</artifactId>
+      <version>1.1.1-2017-03-24</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    
+    <!-- cli -->
+    <dependency>
+      <groupId>args4j</groupId>
+      <artifactId>args4j</artifactId>
+      <version>2.37</version>
+    </dependency>
+    
+    <!-- logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.12</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.3</version>
+    </dependency>
+  
+  </dependencies>
+
+                
+  <build>
+    
+    <finalName>gpiotest</finalName>
+    
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/config</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>  
+
+    <plugins>
+      <!--
+      <plugin>
+        <artifactId>maven-toolchains-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>toolchain</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <toolchains>
+            <jdk>
+              <version>11</version>
+              <vendor>Oracle</vendor>
+            </jdk>
+          </toolchains>
+        </configuration>
+      </plugin>
+      -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+      </plugin>
+    </plugins>
+  </build>
+
+
+  <profiles>
+    <profile>
+      <id>build-app</id>
+   
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.1.1</version>
+            <executions>
+              <execution>
+                <id>copy-dependencies</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                  <stripVersion>true</stripVersion>
+                  <outputDirectory>${project.build.directory}/app/lib</outputDirectory>
+                </configuration>
+              </execution>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>${project.groupId}</groupId>
+                      <artifactId>${project.artifactId}</artifactId>
+                      <version>${project.version}</version>
+                      <overWrite>true</overWrite>
+                      <outputDirectory>${project.build.directory}/app/lib</outputDirectory>
+                      <destFileName>gpiotest.jar</destFileName>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>appassembler-maven-plugin</artifactId>
+            <version>2.1.0</version>
+            <configuration>
+              <logsDirectory>logs</logsDirectory>
+              <configurationDirectory>config</configurationDirectory>
+              <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+              <binPrefix>app</binPrefix>
+              <assembleDirectory>${project.build.directory}/app</assembleDirectory>
+              <extraJvmArguments>-Djava.library.path=/usr/local/lib</extraJvmArguments>
+              <repositoryLayout>flat</repositoryLayout>
+              <repositoryName>lib</repositoryName>
+              <generateRepository>false</generateRepository>
+              <useWildcardClassPath>true</useWildcardClassPath>
+              <programs>
+                <program>
+                  <mainClass>l9g.gpiotest.App</mainClass>
+                  <id>app</id>
+                </program>
+              </programs>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>assemble</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/app.xml</descriptor>
+              </descriptors>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>run-on-raspberrypi</id>
+      
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>wagon-maven-plugin</artifactId>
+            <version>2.0.0</version>
+            <executions>
+              <execution>
+                <id>upload-to-raspberrypi</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>upload</goal>
+                </goals>
+                <configuration>
+                  <serverId>photobox</serverId>
+                  <fromDir>${project.build.directory}</fromDir>
+                  <includes>gpiotest.jar</includes>
+                  <url>scp://photobox2</url>
+                  <toDir>/home/pi/gpiotest/lib</toDir>
+                </configuration>
+              </execution>
+              
+              <execution>
+                <id>execute-on-raspberrypi</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sshexec</goal>
+                </goals>
+                <configuration>
+                  <serverId>photobox</serverId>
+                  <url>scp://photobox2</url>
+                  <commands>
+                    <command>export DISPLAY=:0.0;export PATH="/opt/java/latest/bin:$PATH";lxterminal -e ./gpiotest/bin/app</command>
+                  </commands>
+                  <displayCommandOutputs>true</displayCommandOutputs>
+                </configuration>
+              </execution>
+              
+            </executions>
+          </plugin>
+          
+        </plugins>
+      </build>
+    </profile>
+
+  </profiles>
+    
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <jackson.version>2.15.2</jackson.version>
+    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+    <build.timestamp>${maven.build.timestamp}</build.timestamp>
+  </properties>
+</project>
