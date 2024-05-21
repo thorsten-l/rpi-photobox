@@ -97,7 +97,7 @@ public class ApplicationCommands implements ApplicationRunner,
     if (gpioTestFailed)
     {
       log.error("GPIO Test (Taster) fehlgeschlagen!");
-      System.exit(-1);
+      System.exit(99);
     }
 
     gpioTestMode = false;
