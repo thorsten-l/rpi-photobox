@@ -34,8 +34,17 @@ public class GpioContext
   {
     log.debug("GpioContext");
     pi4j = Pi4J.newAutoContext();
+    log.debug("wait 2s");
+    try
+    {
+      Thread.sleep(2000);
+    }
+    catch (InterruptedException ex)
+    {
+      log.error("init 2s interrupted", ex);
+    }
   }
- 
+
   public static Context getPi4JContext()
   {
     log.debug("getPi4JContext");
