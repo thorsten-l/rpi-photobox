@@ -82,6 +82,7 @@ public class ViewPortPanel extends JPanel implements Runnable
     int width = displayMode.getWidth();
     int height = displayMode.getHeight();
     Dimension panelDimension = new Dimension(width, height);
+    this.buildProperties = BuildProperties.getInstance();
     this.setPreferredSize(panelDimension);
     this.setMinimumSize(panelDimension);
     this.setBounds(0, 0, width, height);
@@ -435,6 +436,7 @@ public class ViewPortPanel extends JPanel implements Runnable
 
       case READY:
       case COUNTDOWN:
+      case STARTUP:
       default:
       {
         doOnce = true;
@@ -460,6 +462,37 @@ public class ViewPortPanel extends JPanel implements Runnable
           }
         }
 
+        if (AppState.getState() == AppState.STARTUP)
+        {
+          if( System.currentTimeMillis() 
+            - AppState.getStateChangedTimestamp() > 15000 )
+          {
+            AppState.setState(STANDBY);
+          }
+          else
+          {
+            int x = 96;
+            int y = 160;
+            int i = 96;
+            g.setColor(Color.DARK_GRAY);
+            g.fillRoundRect(32, 32, this.getWidth()-64, this.getHeight()-64, 32, 32);
+            g.setColor(Color.WHITE);
+            g.drawRoundRect(32, 32, this.getWidth()-64, this.getHeight()-64, 32, 32);
+            g.setFont(infoFont);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+            g.drawString("PhotoBox2", x, y);
+            y += i;
+            g.drawString("version: " + buildProperties.getProjectVersion(), x, y);
+            y += i;
+            g.drawString("build time: " + buildProperties.getTimestamp(), x, y);
+            y += i+i;
+            g.drawString("Dr.-Ing. Thorsten Ludewig", x+x, y);
+            y += i;
+            g.drawString("t.ludewig@gmail.com", x+x, y);
+          }
+        }
+        
         if (AppState.getState() == AppState.COUNTDOWN)
         {          
           if (counter <= 2)
@@ -529,7 +562,7 @@ public class ViewPortPanel extends JPanel implements Runnable
     log.info("viewport running");
     Frame videoFrame;
 
-    AppState.setState(AppState.STANDBY);
+    AppState.setState(AppState.STARTUP);
 
     while (active)
     {
@@ -599,6 +632,8 @@ public class ViewPortPanel extends JPanel implements Runnable
   private int buttonArc;
 
   /////////////////////////////////////////////////////////////////////////////
+  private BuildProperties buildProperties;
+
   private boolean printingChecked;
 
   private int buttonWidth;
