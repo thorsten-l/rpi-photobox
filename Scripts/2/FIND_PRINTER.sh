@@ -1,7 +1,7 @@
 #!/bin/bash
 export PATH=/usr/bin
 
-USB_ID=`lsusb | grep -i SELPHY | awk '{print $6}'`
+USB_ID=`lsusb | grep -iE "SELPHY|Photo Printer" | awk '{print $6}'`
 
 if [[ -z "${USB_ID}" ]]; then
   echo NO_PRINTER_DETECTED
