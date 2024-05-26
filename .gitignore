@@ -35,3 +35,5 @@ gphoto2-webapi
 
 .pio
 .vscode
+.rebel.xml.bak
+rebel.xml
