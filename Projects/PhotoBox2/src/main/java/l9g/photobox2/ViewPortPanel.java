@@ -73,7 +73,7 @@ public class ViewPortPanel extends JPanel implements Runnable
   private final GphotoWebApiService gphotoService;
 
   private final PrinterService printerService;
-  
+
   private final NeoPixelRingService neoPixelService;
 
   void initialize(ApplicationCommands applicationCommands)
@@ -97,6 +97,9 @@ public class ViewPortPanel extends JPanel implements Runnable
     this.buttonWidth = viewportWidth / 2 - buttonGap;
     this.buttonPosY = viewportHeight - 1 - buttonHeight;
     this.counter = 5;
+
+    File directory = new File(thumbsDirectory);
+    directory.mkdirs();
 
     Rectangle noButton = new Rectangle(
       0, buttonPosY, buttonWidth, buttonHeight);
@@ -302,6 +305,22 @@ public class ViewPortPanel extends JPanel implements Runnable
           File imageDirectory = new File(capturedImage.getLocalFolder());
           snapshot = ImageIO.read(
             new File(imageDirectory, capturedImage.getInfo().getName()));
+
+          // Create Thumbnail ///
+          BufferedImage resizedImage = new BufferedImage(thumbsWidth,
+            thumbsHeight, BufferedImage.TYPE_INT_RGB);
+          Graphics2D g = resizedImage.createGraphics();
+          g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+          g.drawImage(snapshot, 0, 0, thumbsWidth, thumbsHeight, null);
+          g.dispose();
+          
+          File thumbsFile = new File( thumbsDirectory 
+            + File.separator + capturedImage.getInfo().getName());
+          
+          ImageIO.write(resizedImage, "JPEG", thumbsFile);
+          
+          /////
           doOnce = true;
           AppState.setState(AppState.PRINTQUESTION);
         }
@@ -464,8 +483,8 @@ public class ViewPortPanel extends JPanel implements Runnable
 
         if (AppState.getState() == AppState.STARTUP)
         {
-          if( System.currentTimeMillis() 
-            - AppState.getStateChangedTimestamp() > 15000 )
+          if (System.currentTimeMillis()
+            - AppState.getStateChangedTimestamp() > 10000)
           {
             AppState.setState(STANDBY);
           }
@@ -475,26 +494,29 @@ public class ViewPortPanel extends JPanel implements Runnable
             int y = 160;
             int i = 96;
             g.setColor(Color.DARK_GRAY);
-            g.fillRoundRect(32, 32, this.getWidth()-64, this.getHeight()-64, 32, 32);
+            g.fillRoundRect(32, 32, this.getWidth() - 64, this.getHeight() - 64,
+              32, 32);
             g.setColor(Color.WHITE);
-            g.drawRoundRect(32, 32, this.getWidth()-64, this.getHeight()-64, 32, 32);
+            g.drawRoundRect(32, 32, this.getWidth() - 64, this.getHeight() - 64,
+              32, 32);
             g.setFont(infoFont);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
+              RenderingHints.VALUE_ANTIALIAS_ON);
             g.drawString("PhotoBox2", x, y);
             y += i;
-            g.drawString("version: " + buildProperties.getProjectVersion(), x, y);
+            g.
+              drawString("version: " + buildProperties.getProjectVersion(), x, y);
             y += i;
             g.drawString("build time: " + buildProperties.getTimestamp(), x, y);
-            y += i+i;
-            g.drawString("Dr.-Ing. Thorsten Ludewig", x+x, y);
+            y += i + i;
+            g.drawString("Dr.-Ing. Thorsten Ludewig", x + x, y);
             y += i;
-            g.drawString("t.ludewig@gmail.com", x+x, y);
+            g.drawString("t.ludewig@gmail.com", x + x, y);
           }
         }
-        
+
         if (AppState.getState() == AppState.COUNTDOWN)
-        {          
+        {
           if (counter <= 2)
           {
             clearScreen(Color.black);
@@ -533,16 +555,16 @@ public class ViewPortPanel extends JPanel implements Runnable
 
           if (System.currentTimeMillis() - timestamp >= 1000)
           {
-            if ( counter == 4 )
+            if (counter == 4)
             {
               neoPixelService.run();
             }
-            
-            if ( counter == 2 )
+
+            if (counter == 2)
             {
-               neoPixelService.flash();
+              neoPixelService.flash();
             }
-            
+
             timestamp = System.currentTimeMillis();
             counter--;
             if (counter == 0)
@@ -630,6 +652,15 @@ public class ViewPortPanel extends JPanel implements Runnable
 
   @Value("${viewport.button.arc}")
   private int buttonArc;
+
+  @Value("${viewport.thumbs.width}")
+  private int thumbsWidth;
+
+  @Value("${viewport.thumbs.height}")
+  private int thumbsHeight;
+
+  @Value("${viewport.thumbs.directory}")
+  private String thumbsDirectory;
 
   /////////////////////////////////////////////////////////////////////////////
   private BuildProperties buildProperties;

@@ -52,6 +52,10 @@ viewport:
     gap: 20
     height: 128
     arc: 32
+  thumbs:
+    width: 768
+    height: 512
+    directory: "/home/th/Pictures/thumbs"
 
 gpio:
   pin:
@@ -65,7 +69,7 @@ gphoto-webapi:
     --server
   url: "http://0.0.0.0:8866/api"
   camera: "Canon EOS 7D"
-  directory: "/home/th/var"
+  directory: "/home/th/Pictures/images"
   capture:
     timeout: 10000
 
