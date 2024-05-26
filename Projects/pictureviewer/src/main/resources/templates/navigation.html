@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+  <head>
+  </head>
+  <body>
+    <div th:fragment="pagination">
+      <nav>
+        <ul class="pagination">
+          <li class="page-item">
+            <a class="page-link" th:href="@{/}" aria-label="Vorherige"><span class="mdi mdi-page-first"></span></a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" th:href='${"?page=" + (page-1)}'><span class="mdi mdi-chevron-double-left"></span></a>
+          </li>
+          <li class="page-item"><a class="page-link mdi" href="#"><span th:text="${page}"></span></a></li>
+          <li class="page-item">
+            <a class="page-link" th:href='${"?page=" + (page+1)}'><span class="mdi mdi-chevron-double-right"></span></a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" th:href='${"?page=" + pageCount }'><span class="mdi mdi-page-last"></span></a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+spring:
+
+  profiles:
+    active: default
+
+  application:
+    name: pictureviewer
+
+  main:
+    banner-mode: off
+
+logging:
+  file:
+    name: pictureviewer.log
+    path: logs
+  pattern:
+    console: "%date{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger:%line - %msg %n"
+  level:
+    root: INFO
+    l9g: TRACE
+
+pictureviewer:
+  thumbs:
+    width: 768
+    height: 512
+    directory: "/Users/th/photobox/Pictures/thumbs"
+  images:
+    directory: "/Users/th/photobox/Pictures/images"
+  web-base: "http://192.168.4.231/pictures"

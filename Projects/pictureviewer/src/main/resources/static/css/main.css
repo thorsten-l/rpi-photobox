@@ -1,0 +1,23 @@
+body {
+  color: #f0f0f0;
+  background-color: #101010;
+}
+
+.thumbnail
+{
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.pagination {
+  justify-content: center; /* Zentriert die Paginierung */
+}
+
+.mdi {
+  font-size: 2rem; /* Vergrößert die Icons */
+}
+
+.page-link {
+  color: #f0f0f0;
+  background-color: #404040;
+}

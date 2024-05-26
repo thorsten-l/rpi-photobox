@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>PictureViewer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" ></link>
+    <link th:rel="stylesheet" th:href="@{/webjars/mdi__font/css/materialdesignicons.min.css}"></link>  
+    <link th:rel="stylesheet" th:href="@{/css/main.css}" ></link>
+  </head>
+  <body>
+    <div style="margin-top: 1em" class="container">
+      <h1>PictureViewer for PhotoBox2</h1>
+      <div style="margin-top: 1em">&nbsp;</div>
+      <div th:replace="~{navigation::pagination}" th:remove="tag"></div>
+      <div class="row">
+        <div class='col-12' th:each="name : ${imageNames}">
+          <a th:href='${webBase + "/images/" + name}'>
+            <img class='thumbnail img-fluid'
+                 th:width="${thumbsWidth}" 
+                 th:height="${thumbsHeight}" 
+                 th:src='${webBase + "/thumbs/" + name}' /></a>
+          <div th:text="${name}"></div>
+        </div>
+      </div>
+      <div style="margin-top: 1em">&nbsp;</div>
+      <div th:replace="~{navigation::pagination}" th:remove="tag"></div>
+    </div>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+  </body>
+</html>
