@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -52,7 +53,7 @@ public class HomeController
     {
       String[] fileNames = thumbsDirectory.list(
         (File dir, String name) -> name.toLowerCase().endsWith(".jpg"));
-      Arrays.sort(fileNames);
+      Arrays.sort(fileNames, Collections.reverseOrder());
       imageCount = fileNames.length;
 
       pageCount = (imageCount + 3) / 4;
@@ -78,6 +79,7 @@ public class HomeController
     model.addAttribute("thumbsWidth", thumbsWidth);
     model.addAttribute("thumbsHeight", thumbsHeight);
     model.addAttribute("webBase", webBase);
+    model.addAttribute("timestamp", System.currentTimeMillis());
     return "home";
   }
 

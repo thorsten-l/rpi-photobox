@@ -10,14 +10,17 @@
             <a class="page-link" th:href="@{/}" aria-label="Vorherige"><span class="mdi mdi-page-first"></span></a>
           </li>
           <li class="page-item">
-            <a class="page-link" th:href='${"?page=" + (page-1)}'><span class="mdi mdi-chevron-double-left"></span></a>
+            <a class="page-link" th:href='@{/(page=${(page-1)})}'><span class="mdi mdi-chevron-double-left"></span></a>
           </li>
           <li class="page-item"><a class="page-link mdi" href="#"><span th:text="${page}"></span></a></li>
           <li class="page-item">
-            <a class="page-link" th:href='${"?page=" + (page+1)}'><span class="mdi mdi-chevron-double-right"></span></a>
+            <a class="page-link" th:href='@{/(page=${(page+1)})}'><span class="mdi mdi-chevron-double-right"></span></a>
           </li>
           <li class="page-item">
-            <a class="page-link" th:href='${"?page=" + pageCount }'><span class="mdi mdi-page-last"></span></a>
+            <a class="page-link" th:href='@{/(page=${pageCount})}'><span class="mdi mdi-page-last"></span></a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" th:href='@{/(timestamp=${timestamp})}'><span class="mdi mdi-reload"></span></a>
           </li>
         </ul>
       </nav>

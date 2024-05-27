@@ -8,11 +8,11 @@
     <link th:rel="stylesheet" th:href="@{/css/main.css}" ></link>
   </head>
   <body>
-    <div style="margin-top: 1em" class="container">
+    <div style="margin-top: 1em" class="container center-container">
       <h1>PictureViewer for PhotoBox2</h1>
       <div style="margin-top: 1em">&nbsp;</div>
       <div th:replace="~{navigation::pagination}" th:remove="tag"></div>
-      <div class="row">
+      <div class="row center-container">
         <div class='col-12' th:each="name : ${imageNames}">
           <a th:href='${webBase + "/images/" + name}'>
             <img class='thumbnail img-fluid'

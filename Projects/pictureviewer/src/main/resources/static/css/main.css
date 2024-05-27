@@ -21,3 +21,9 @@ body {
   color: #f0f0f0;
   background-color: #404040;
 }
+
+.center-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

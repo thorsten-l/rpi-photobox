@@ -123,4 +123,44 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>remote-run-on-photobox</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>copy-to-photobox</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>scp</executable>
+                  <workingDirectory>target</workingDirectory>
+                  <commandlineArgs>pictureviewer.jar photobox:pictureviewer.jar</commandlineArgs>
+                </configuration>
+              </execution>
+              <execution>
+                <id>run-on-photobox</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>ssh</executable>
+                  <commandlineArgs>photobox ./pictureviewer.jar</commandlineArgs>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>

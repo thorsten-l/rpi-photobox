@@ -17,13 +17,13 @@ logging:
     console: "%date{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger:%line - %msg %n"
   level:
     root: INFO
-    l9g: TRACE
+    l9g: INFO
 
 pictureviewer:
   thumbs:
     width: 768
     height: 512
-    directory: "/Users/th/photobox/Pictures/thumbs"
+    directory: "/home/th/Pictures/thumbs"
   images:
-    directory: "/Users/th/photobox/Pictures/images"
+    directory: "/home/th/Pictures/images"
   web-base: "http://192.168.4.231/pictures"
