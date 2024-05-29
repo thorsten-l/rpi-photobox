@@ -27,6 +27,7 @@ import l9g.photobox2.gpio.GpioButtonEvent;
 import l9g.photobox2.gpio.GpioButtonHandler;
 import l9g.photobox2.gpio.GpioButtonListener;
 import l9g.photobox2.gpio.GpioOutput;
+import l9g.photobox2.service.FsUtilService;
 import l9g.photobox2.service.GphotoWebApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +55,7 @@ public class ApplicationCommands implements ApplicationRunner,
   private final DisplayMode displayMode;
 
   private final GraphicsDevice graphicsDevice;
-
+  
   @Override
   public void run(ApplicationArguments args) throws Exception
   {

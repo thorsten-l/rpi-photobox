@@ -80,3 +80,8 @@ printer:
     status: "lpstat -p {0}"
     cancel: "cancel -a -x"
     enable: "sudo lpadmin -p {0} -E"
+
+fsutil:
+  usb-device: "/dev/sda1"
+  proc-mounts: "/proc/mounts"
+  cp: "/bin/cp"

@@ -30,6 +30,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import static l9g.photobox2.AppState.LOADPICTURE;
@@ -43,6 +45,7 @@ import static l9g.photobox2.AppState.TAKEPICTURE;
 import static l9g.photobox2.AppState.YESPRINT;
 import l9g.photobox2.gphoto.CapturedImage;
 import l9g.photobox2.gphoto.CapturedImageResponse;
+import l9g.photobox2.service.FsUtilService;
 import l9g.photobox2.service.GphotoWebApiService;
 import l9g.photobox2.service.NeoPixelRingService;
 import l9g.photobox2.service.PrinterService;
@@ -75,6 +78,8 @@ public class ViewPortPanel extends JPanel implements Runnable
   private final PrinterService printerService;
 
   private final NeoPixelRingService neoPixelService;
+  
+  private final FsUtilService fsUtilService;
 
   void initialize(ApplicationCommands applicationCommands)
   {
@@ -319,15 +324,18 @@ public class ViewPortPanel extends JPanel implements Runnable
             + File.separator + capturedImage.getInfo().getName());
           
           ImageIO.write(resizedImage, "JPEG", thumbsFile);
+          /////
+          
+          fsUtilService.copyToUsbStick(capturedImage.getInfo().getName());
           
           /////
           doOnce = true;
           AppState.setState(AppState.PRINTQUESTION);
         }
-        catch (IOException ex)
+        catch (IOException | InterruptedException ex)
         {
           AppState.setState(AppState.ERROR, "Bilddaten!");
-          log.error("loading image", ex);
+          log.error("loading/writing image", ex);
         }
       }
       break;
