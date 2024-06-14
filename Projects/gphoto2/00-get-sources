@@ -1,5 +1,5 @@
 #!/bin/sh -v
 unset LC_CTYPE
 rm -fr gphoto2* libgphoto2*
-tar xfz ~/Downloads/libgphoto2-2.5.23.tar.gz
-tar xfz ~/Downloads/gphoto2-2.5.23.tar.gz
+tar xfz ~/Downloads/libgphoto2-2.5.31.tar.gz
+tar xfz ~/Downloads/gphoto2-2.5.28.tar.gz
