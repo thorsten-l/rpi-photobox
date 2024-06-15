@@ -31,7 +31,7 @@ grabber:
   framerate: 15.0
   codec: "mjpeg"
   mode: "1640:1232:10:P"
-  roi: "0.1,0.1,0.8,0.8"
+  roi: "0.05,0.05,0.9,0.8"
   stream-url: "udp://0.0.0.0:9595"
 
 viewport:
