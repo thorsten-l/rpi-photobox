@@ -244,7 +244,7 @@
                 <configuration>
                   <executable>scp</executable>
                   <workingDirectory>target</workingDirectory>
-                  <commandlineArgs>PhotoBox2.jar photobox:PhotoBox2/lib/photobox.jar</commandlineArgs>
+                  <commandlineArgs>PhotoBox2.jar photobox2:PhotoBox2/lib/photobox.jar</commandlineArgs>
                 </configuration>
               </execution>
               <execution>
@@ -255,7 +255,7 @@
                 </goals>
                 <configuration>
                   <executable>ssh</executable>
-                  <commandlineArgs>photobox export DISPLAY=:0.0; ./PhotoBox2/bin/app</commandlineArgs>
+                  <commandlineArgs>photobox2 export DISPLAY=:0.0; ./PhotoBox2/bin/app</commandlineArgs>
                 </configuration>
               </execution>
             </executions>
@@ -283,7 +283,7 @@
                 <configuration>
                   <executable>scp</executable>
                   <workingDirectory>target</workingDirectory>
-                  <commandlineArgs>PhotoBox2.jar photobox:PhotoBox2/lib/photobox.jar</commandlineArgs>
+                  <commandlineArgs>PhotoBox2.jar photobox2:PhotoBox2/lib/photobox.jar</commandlineArgs>
                 </configuration>
               </execution>
             </executions>

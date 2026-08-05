@@ -6,19 +6,18 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.5</version>
+    <version>3.5.13</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   
   <groupId>l9g.photobox</groupId>
   <artifactId>PhotoBox2</artifactId>
-  <version>2.1.5</version>
+  <version>2.2.0</version>
   <name>PhotoBox2</name>
   <description>PhotoBox2 (Wedding)</description>
   
   <properties>
     <java.version>17</java.version>
-    <spring-shell.version>3.2.4</spring-shell.version>
     <pi4j.version>2.6.0</pi4j.version>
     <build.profile>default</build.profile>
     <javacv.platform>linux-arm64</javacv.platform>
@@ -112,6 +111,21 @@
       </resource>
     </resources>
 
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+    </plugins>
+
   </build>
 
   <profiles>
@@ -146,7 +160,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.6.1</version>
+            <version>3.9.0</version>
             <executions>
               <execution>
                 <id>copy-dependencies</id>
@@ -242,7 +256,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.5.1</version>
             <executions>
               <execution>
                 <id>copy-to-photobox</id>
@@ -253,7 +267,7 @@
                 <configuration>
                   <executable>scp</executable>
                   <workingDirectory>target</workingDirectory>
-                  <commandlineArgs>PhotoBox2.jar photobox:PhotoBox2/lib/photobox.jar</commandlineArgs>
+                  <commandlineArgs>PhotoBox2.jar photobox2:PhotoBox2/lib/photobox.jar</commandlineArgs>
                 </configuration>
               </execution>
               <execution>
@@ -264,7 +278,7 @@
                 </goals>
                 <configuration>
                   <executable>ssh</executable>
-                  <commandlineArgs>photobox export DISPLAY=:0.0; ./PhotoBox2/bin/app</commandlineArgs>
+                  <commandlineArgs>photobox2 export DISPLAY=:0.0; ./PhotoBox2/bin/app</commandlineArgs>
                 </configuration>
               </execution>
             </executions>
@@ -281,7 +295,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.5.1</version>
             <executions>
               <execution>
                 <id>copy-to-photobox</id>
@@ -292,7 +306,7 @@
                 <configuration>
                   <executable>scp</executable>
                   <workingDirectory>target</workingDirectory>
-                  <commandlineArgs>PhotoBox2.jar photobox:PhotoBox2/lib/photobox.jar</commandlineArgs>
+                  <commandlineArgs>PhotoBox2.jar photobox2:PhotoBox2/lib/photobox.jar</commandlineArgs>
                 </configuration>
               </execution>
             </executions>
