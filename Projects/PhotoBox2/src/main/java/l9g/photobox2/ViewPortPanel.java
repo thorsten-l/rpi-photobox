@@ -30,9 +30,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.JPanel;
 import static l9g.photobox2.AppState.LOADPICTURE;
 import static l9g.photobox2.AppState.PRINTINGFAILED;
@@ -178,6 +182,77 @@ public class ViewPortPanel extends JPanel implements Runnable
     captureMonitor.start();
   }
 
+  private void processPicture()
+  {
+    Thread pictureWorker = new Thread(() ->
+    {
+      try
+      {
+        CapturedImage capturedImage = capturedImageResponse.getImages()[0];
+        File imageDirectory = new File(capturedImage.getLocalFolder());
+        snapshot = readScaledImage(
+          new File(imageDirectory, capturedImage.getInfo().getName()));
+
+        // Create Thumbnail ///
+        BufferedImage resizedImage = new BufferedImage(thumbsWidth,
+          thumbsHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D tg = resizedImage.createGraphics();
+        tg.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+          RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        tg.drawImage(snapshot, 0, 0, thumbsWidth, thumbsHeight, null);
+        tg.dispose();
+
+        File thumbsFile = new File(thumbsDirectory
+          + File.separator + capturedImage.getInfo().getName());
+
+        ImageIO.write(resizedImage, "JPEG", thumbsFile);
+        /////
+
+        fsUtilService.copyToUsbStick(capturedImage.getInfo().getName());
+
+        /////
+        doOnce = true;
+        AppState.setState(AppState.PRINTQUESTION);
+      }
+      catch (Throwable t)
+      {
+        AppState.setState(AppState.ERROR, "Bilddaten!");
+        log.error("loading/writing image", t);
+      }
+    });
+    pictureWorker.setName("pictureWorker");
+    pictureWorker.setDaemon(true);
+    pictureWorker.start();
+  }
+
+  private BufferedImage readScaledImage(File imageFile) throws IOException
+  {
+    try (ImageInputStream imageInput
+      = ImageIO.createImageInputStream(imageFile))
+    {
+      Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
+      if (readers == null || !readers.hasNext())
+      {
+        throw new IOException("no image reader for " + imageFile);
+      }
+      ImageReader reader = readers.next();
+      try
+      {
+        reader.setInput(imageInput);
+        // subsample to ~2x the viewport size - enough for display + thumbnail
+        int subsampling = Math.max(1,
+          reader.getWidth(0) / (imageWidth * 2));
+        ImageReadParam param = reader.getDefaultReadParam();
+        param.setSourceSubsampling(subsampling, subsampling, 0, 0);
+        return reader.read(0, param);
+      }
+      finally
+      {
+        reader.dispose();
+      }
+    }
+  }
+
   void showMessage(boolean errorMessage, String message)
   {
     g.setFont(infoFont);
@@ -304,39 +379,22 @@ public class ViewPortPanel extends JPanel implements Runnable
 
       case LOADPICTURE:
       {
-        try
-        {
-          CapturedImage capturedImage = capturedImageResponse.getImages()[0];
-          File imageDirectory = new File(capturedImage.getLocalFolder());
-          snapshot = ImageIO.read(
-            new File(imageDirectory, capturedImage.getInfo().getName()));
+        AppState.setState(AppState.PROCESSINGPICTURE);
+        processPicture();
+      }
+      break;
 
-          // Create Thumbnail ///
-          BufferedImage resizedImage = new BufferedImage(thumbsWidth,
-            thumbsHeight, BufferedImage.TYPE_INT_RGB);
-          Graphics2D g = resizedImage.createGraphics();
-          g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-            RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-          g.drawImage(snapshot, 0, 0, thumbsWidth, thumbsHeight, null);
-          g.dispose();
-          
-          File thumbsFile = new File( thumbsDirectory 
-            + File.separator + capturedImage.getInfo().getName());
-          
-          ImageIO.write(resizedImage, "JPEG", thumbsFile);
-          /////
-          
-          fsUtilService.copyToUsbStick(capturedImage.getInfo().getName());
-          
-          /////
-          doOnce = true;
-          AppState.setState(AppState.PRINTQUESTION);
-        }
-        catch (IOException | InterruptedException ex)
-        {
-          AppState.setState(AppState.ERROR, "Bilddaten!");
-          log.error("loading/writing image", ex);
-        }
+      case PROCESSINGPICTURE:
+      {
+        // continue the TAKEPICTURE2 progress bar on the same timeline
+        double progress = Math.min(1.0,
+          ((System.currentTimeMillis() - timestamp) - 1000) / maxProgressTime);
+
+        g.setColor(Color.yellow);
+        g.fillRoundRect(5, 200, (int) ((viewportWidth - 10) * progress), 100,
+          buttonArc, buttonArc);
+        g.setColor(Color.cyan);
+        g.drawRoundRect(5, 200, viewportWidth - 10, 100, buttonArc, buttonArc);
       }
       break;
 

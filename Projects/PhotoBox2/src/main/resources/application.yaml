@@ -22,7 +22,7 @@ logging:
     console: "%date{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger:%line - %msg %n"
   level:
     root: INFO
-    l9g: TRACE
+    l9g: INFO
     org.jline: OFF
 
 grabber:
@@ -30,6 +30,7 @@ grabber:
   height: 800
   framerate: 15.0
   codec: "mjpeg"
+  decoder: ""
   mode: "1640:1232:10:P"
   roi: "0.05,0.05,0.9,0.8"
   stream-url: "udp://0.0.0.0:9595"

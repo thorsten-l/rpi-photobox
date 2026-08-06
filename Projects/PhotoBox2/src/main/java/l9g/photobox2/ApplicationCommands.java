@@ -182,26 +182,55 @@ public class ApplicationCommands implements ApplicationRunner,
   public void shutdownPhotobox()
   {
     log.info("exit photobox2");
+
+    // each stop step isolated - one failing step (Throwable, e.g.
+    // NoClassDefFoundError after a jar hot-replace) must not prevent
+    // the remaining child processes from being stopped
     try
     {
       log.debug("shutdown button handler ...");
       shutterButtonHandler.shutdown();
+    }
+    catch (Throwable t)
+    {
+      log.error("shutdown button handler", t);
+    }
+
+    try
+    {
       log.debug("stopping viewport ...");
       viewport.stop();
       if (viewportRunner != null)
       {
         viewportRunner.join(2000);
       }
+    }
+    catch (Throwable t)
+    {
+      log.error("stop viewport", t);
+    }
+
+    try
+    {
       log.debug("stopping grabber ...");
       grabberService.stop();
+    }
+    catch (Throwable t)
+    {
+      log.error("stop grabber", t);
+    }
+
+    try
+    {
       log.debug("stopping gphoto-webapi ...");
       gphotoWebApiService.stop();
-      log.debug("all services shutdown!");
     }
-    catch (Exception ex)
+    catch (Throwable t)
     {
-      log.error("stop grabber", ex);
+      log.error("stop gphoto-webapi", t);
     }
+
+    log.debug("all services shutdown!");
     log.debug("exit - reset full screen window");
     //graphicsDevice.setFullScreenWindow(null);
     //System.exit(0);

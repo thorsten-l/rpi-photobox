@@ -15,6 +15,9 @@
  */
 package l9g.photobox2.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 import org.bytedeco.javacv.*;
@@ -36,19 +39,34 @@ public class FrameGrabberService
     {
       ProcessBuilder builder = new ProcessBuilder();
       builder.inheritIO();
-      builder.command(
+      ArrayList<String> command = new ArrayList<>(Arrays.asList(
         "/usr/bin/libcamera-vid", "--hflip", "-n", "-t", "0",
         "--autofocus-mode", "continuous",
         "--mode", videoMode, "--roi", videoRoi,
         "--framerate", Double.toString(videoFramerate),
         "--width", Integer.toString(videoWidth),
         "--height", Integer.toString(videoHeight),
-        "--codec", videoCodec, "-o", videoStreamUrl
-      );
+        "--codec", videoCodec
+      ));
+      if ("h264".equals(videoCodec))
+      {
+        // repeat SPS/PPS with every intra frame so the grabber can join
+        // the running UDP stream; one keyframe per second
+        command.addAll(Arrays.asList("--inline",
+          "--intra", Integer.toString((int) videoFramerate)));
+      }
+      command.addAll(Arrays.asList("-o", videoStreamUrl));
+      builder.command(command);
       libcameraProcess = builder.start();
 
       log.debug("libcamera-vid started waiting 3s");
       Thread.sleep(3000);
+
+      if (!libcameraProcess.isAlive())
+      {
+        throw new Exception("libcamera-vid not started (exit code "
+          + libcameraProcess.exitValue() + ") - camera busy?");
+      }
       log.debug("setup ffmpeg log callback");
 
       FFmpegLogCallback.set();
@@ -60,6 +78,11 @@ public class FrameGrabberService
       grabber.setFrameRate(videoFramerate);
       grabber.setFormat(videoCodec);
       grabber.setPixelFormat(AV_PIX_FMT_BGR24);
+      if (videoDecoder != null && !videoDecoder.isBlank())
+      {
+        log.info("using video decoder '{}'", videoDecoder);
+        grabber.setVideoCodecName(videoDecoder);
+      }
 
       log.debug("starting ffmpeg grabber");
       grabber.start();
@@ -74,10 +97,27 @@ public class FrameGrabberService
     if (running)
     {
       log.info("stopping grabber");
+
+      // stop the stream source first - a hanging grabber.close() must not
+      // leave an orphaned libcamera-vid behind (it blocks the camera and
+      // keeps streaming to the UDP port)
+      libcameraProcess.destroy();
+      try
+      {
+        if (!libcameraProcess.waitFor(2, TimeUnit.SECONDS))
+        {
+          log.warn("libcamera-vid ignored SIGTERM - destroy forcibly");
+          libcameraProcess.destroyForcibly();
+        }
+      }
+      catch (InterruptedException ex)
+      {
+        Thread.currentThread().interrupt();
+      }
+
       grabber.close();
       grabber.stop();
       grabber.release();
-      libcameraProcess.destroy();
       running = false;
     }
     log.debug("stop - done.");
@@ -103,6 +143,9 @@ public class FrameGrabberService
 
   @Value("${grabber.codec}")
   private String videoCodec;
+
+  @Value("${grabber.decoder:}")
+  private String videoDecoder;
 
   @Value("${grabber.mode}")
   private String videoMode;

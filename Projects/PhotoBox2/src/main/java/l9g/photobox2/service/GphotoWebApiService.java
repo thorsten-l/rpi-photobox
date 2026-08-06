@@ -18,6 +18,7 @@ package l9g.photobox2.service;
 import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import l9g.photobox2.gphoto.AutoDetectResponse;
 import l9g.photobox2.gphoto.CapturedImageResponse;
 import l9g.photobox2.gphoto.ShutdownResponse;
@@ -91,27 +92,39 @@ public class GphotoWebApiService
     log.debug("stopping gphoto-webapi");
     if (gphotoWebApiProcess != null && gphotoWebApiProcess.isAlive())
     {
-      log.debug("send server shutdown");
-      ResponseEntity<ShutdownResponse> entity = restClient
-        .get()
-        .uri("/server/shutdown")
-        .retrieve().toEntity(ShutdownResponse.class);
-      
-      if (entity.getStatusCode().is2xxSuccessful())
+      try
       {
-        log.info("return_code={}", entity.getBody().getReturnCode());
+        log.debug("send server shutdown");
+        ResponseEntity<ShutdownResponse> entity = restClient
+          .get()
+          .uri("/server/shutdown")
+          .retrieve().toEntity(ShutdownResponse.class);
+
+        if (entity.getStatusCode().is2xxSuccessful())
+        {
+          log.info("return_code={}", entity.getBody().getReturnCode());
+        }
+        else
+        {
+          log.error("Shutdown request NOT successful.");
+        }
       }
-      else
+      catch (Throwable t)
       {
-        log.error("Shutdown request NOT successful.");
+        log.warn("shutdown request failed: {}", t.getMessage());
       }
-      
-      log.debug("sleep 1000");
-      Thread.sleep(1000);
-      if (gphotoWebApiProcess.isAlive())
+
+      if (!gphotoWebApiProcess.waitFor(2, TimeUnit.SECONDS))
       {
         log.debug("destroy process");
         gphotoWebApiProcess.destroy();
+
+        if (!gphotoWebApiProcess.waitFor(2, TimeUnit.SECONDS))
+        {
+          log.warn("gphoto-webapi ignored SIGTERM - destroy forcibly");
+          gphotoWebApiProcess.destroyForcibly();
+          gphotoWebApiProcess.waitFor(2, TimeUnit.SECONDS);
+        }
       }
       log.debug("stopped");
     }
