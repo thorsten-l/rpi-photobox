@@ -181,7 +181,7 @@
               <configurationDirectory>config</configurationDirectory>
               <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
               <assembleDirectory>${project.build.directory}/app</assembleDirectory>
-              <extraJvmArguments>-Djava.library.path=/usr/local/lib</extraJvmArguments>
+              <extraJvmArguments>-Djava.library.path=/usr/local/lib -Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m</extraJvmArguments>
               <repositoryLayout>flat</repositoryLayout>
               <repositoryName>lib</repositoryName>
               <generateRepository>false</generateRepository>

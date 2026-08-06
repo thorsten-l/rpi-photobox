@@ -36,47 +36,55 @@ public class NeoPixelRingService
   {
     log.debug("initialize");
 
-    serial = SerialPort.getCommPort("/dev/ttyUSB0");
-
-    if (serial.openPort())
+    try
     {
-      serial.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
-      serial.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
-      serial.setComPortParameters(
-        115200, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+      serial = SerialPort.getCommPort("/dev/ttyUSB0");
 
-      serialOutputStream = serial.getOutputStream();
-      serialinputStream = serial.getInputStream();
-
-      Thread reader = new Thread(() ->
+      if (serial.openPort())
       {
-        System.out.println("Start input stream reader");
-        int c;
-        try
+        serial.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 0, 0);
+        serial.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
+        serial.setComPortParameters(
+          115200, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+
+        serialOutputStream = serial.getOutputStream();
+        serialinputStream = serial.getInputStream();
+
+        Thread reader = new Thread(() ->
         {
-          while ((c = serialinputStream.read()) >= 0)
+          System.out.println("Start input stream reader");
+          int c;
+          try
           {
-            System.out.write(c);
-            System.out.flush();
+            while ((c = serialinputStream.read()) >= 0)
+            {
+              System.out.write(c);
+              System.out.flush();
+            }
           }
-        }
-        catch (IOException ex)
-        {
-          log.error("ERROR: " + ex.getMessage());
-        }
-        System.out.println("End input stream reader");
-      });
+          catch (IOException ex)
+          {
+            log.error("ERROR: " + ex.getMessage());
+          }
+          System.out.println("End input stream reader");
+        });
 
-      reader.setDaemon(true);
-      reader.start();
+        reader.setDaemon(true);
+        reader.start();
 
-      initialized = true;
-      log.debug("successfully initialized");
+        initialized = true;
+        log.debug("successfully initialized");
+      }
+      else
+      {
+        log.warn("NeoPixel ring not connected (/dev/ttyUSB0) - "
+          + "continuing without LED ring");
+      }
     }
-    else
+    catch (Throwable t)
     {
-      System.out.println("ERROR: Not initialized");
-      log.error("ERROR: Not initialized");
+      log.warn("NeoPixel ring initialization failed ({}) - "
+        + "continuing without LED ring", t.getMessage());
     }
   }
 
